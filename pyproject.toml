@@ -1,0 +1,11 @@
+[tool.poetry]
+name = "context7-to-markdown-docs"
+version = "1.0.0"
+description = "CLI tool to convert Context7 format to markdown documentation"
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.scripts]
+context7-to-markdown = "context7_to_markdown.__main__:main"
