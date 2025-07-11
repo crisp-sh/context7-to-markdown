@@ -16,20 +16,20 @@ A powerful CLI tool that converts Context7 format files to organized markdown do
 ### Using pip
 
 ```bash
-pip install context7-to-markdown
+pip install c2md
 ```
 
 ### Using uv (recommended for faster installation)
 
 ```bash
-uv install context7-to-markdown
+uv install c2md
 ```
 
 ### Development Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/context7/context7-to-markdown.git
+git clone https://github.com/crisp-sh/context7-to-markdown.git
 cd context7-to-markdown
 
 # Install in development mode
@@ -150,7 +150,20 @@ The tool consists of several modular components:
 
 ## 🧪 Testing
 
-Run the test suite:
+Run the test suite using Hatch:
+
+```bash
+# Run tests
+hatch run test
+
+# Run tests with coverage
+hatch run test-cov
+
+# Run specific test file
+hatch run test tests/test_specific.py
+```
+
+### Legacy Testing
 
 ```bash
 # Install development dependencies
@@ -163,6 +176,53 @@ python -m unittest discover tests
 python -m unittest discover tests
 ```
 
+## 🔄 Releasing
+
+This project uses automated versioned releases with [Hatch](https://hatch.pypa.io/) for version management.
+
+### Quick Release
+
+```bash
+# Create a patch release (0.1.0 → 0.1.1)
+hatch run release patch
+
+# Create a minor release (0.1.0 → 0.2.0)
+hatch run release minor
+
+# Create a major release (0.1.0 → 1.0.0)
+hatch run release major
+```
+
+### Release Process
+
+The release script automatically:
+1. Checks that your working directory is clean
+2. Runs the test suite
+3. Updates the version in [`c2md/__init__.py`](c2md/__init__.py:5)
+4. Creates a signed Git commit
+5. Creates a signed Git tag
+6. Pushes to GitHub, triggering the automated release workflow
+
+### Custom Release Message
+
+```bash
+hatch run release patch -m "Fix critical bug in URL parsing"
+```
+
+### Dry Run
+
+```bash
+hatch run release patch --dry-run
+```
+
+### Requirements
+
+- Git signing must be configured (see [docs/RELEASE_SETUP.md](docs/RELEASE_SETUP.md))
+- Tests must pass
+- Working directory must be clean
+
+For detailed setup instructions, see [docs/RELEASE_SETUP.md](docs/RELEASE_SETUP.md).
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -171,7 +231,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ```bash
 # Clone the repository
-git clone https://github.com/context7/context7-to-markdown.git
+git clone https://github.com/crisp-sh/context7-to-markdown.git
 cd context7-to-markdown
 
 # Create a virtual environment
@@ -188,11 +248,14 @@ pip install -e .
 ### Running Tests
 
 ```bash
-# Run all tests
-python -m unittest discover tests
+# Run all tests with Hatch
+hatch run test
 
 # Run specific test file
-python -m unittest tests.test___main__
+hatch run test tests/test_specific.py
+
+# Run tests with coverage
+hatch run test-cov
 ```
 
 ## 📄 License
@@ -201,11 +264,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🐛 Bug Reports
 
-If you encounter any issues, please report them on the [GitHub Issues](https://github.com/context7/context7-to-markdown/issues) page.
+If you encounter any issues, please report them on the [GitHub Issues](https://github.com/crisp-sh/context7-to-markdown/issues) page.
 
 ## 📚 Documentation
 
-For more detailed documentation, visit our [documentation site](https://github.com/context7/context7-to-markdown/docs).
+For more detailed documentation, visit our [documentation site](https://github.com/crisp-sh/context7-to-markdown/docs).
 
 ## 🔄 Changelog
 
@@ -218,4 +281,4 @@ For more detailed documentation, visit our [documentation site](https://github.c
 
 ---
 
-Made with ❤️ by the Context7 team
+Made with ❤️ by [crisp.sh](https://crisp.sh)
