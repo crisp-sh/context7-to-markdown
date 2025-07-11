@@ -17,13 +17,14 @@ class ReleaseManager:
     def __init__(self, repo_root: Path):
         self.repo_root = repo_root
         self.pyproject_path = repo_root / "pyproject.toml"
+        self.init_path = repo_root / "c2md" / "__init__.py"
 
     def get_current_version(self) -> str:
-        """Get the current version from pyproject.toml."""
-        content = self.pyproject_path.read_text()
-        match = re.search(r'version = "([^"]+)"', content)
+        """Get the current version from c2md/__init__.py."""
+        content = self.init_path.read_text()
+        match = re.search(r'__version__ = ["\']([^"\']+)["\']', content)
         if not match:
-            raise ValueError("Could not find version in pyproject.toml")
+            raise ValueError("Could not find version in c2md/__init__.py")
         return match.group(1)
 
     def bump_version(self, version_type: str) -> str:
@@ -59,6 +60,12 @@ class ReleaseManager:
 
     def commit_version_change(self, version: str) -> None:
         """Commit the version change."""
+        # Add both files that hatch modifies during version bump
+        cmd = ["git", "add", "c2md/__init__.py"]
+        subprocess.run(cmd, cwd=self.repo_root, check=True)
+        
+        # Note: pyproject.toml doesn't change since it uses dynamic versioning,
+        # but we'll add it just in case for future compatibility
         cmd = ["git", "add", "pyproject.toml"]
         subprocess.run(cmd, cwd=self.repo_root, check=True)
 
