@@ -40,17 +40,20 @@ jobs:
 
       - name: Create hatch environment
         run: |
-          hatch env create --verbose
+          hatch env create
           hatch env show
 
       - name: Install project dependencies
         run: |
+          echo "=== Current environment packages ==="
           hatch run pip list
-          hatch run pip install -e . --verbose
+          echo "=== Installing project in editable mode ==="
+          hatch run pip install -e . --verbose || (echo "Failed to install project" && hatch run pip install -e . --verbose --no-deps && exit 1)
 
       - name: Install dev tools
         run: |
-          hatch run pip install --verbose black isort bandit safety
+          echo "=== Installing development tools ==="
+          hatch run pip install --verbose black isort bandit safety || (echo "Failed to install dev tools" && exit 1)
 
       # ---------------- Code-quality gates ----------------
       - name: Lint (ruff)
@@ -69,9 +72,20 @@ jobs:
         run: hatch run safety check --full-report || true
 
       # ---------------- Tests & coverage ----------------
+      - name: Debug test environment
+        run: |
+          echo "=== Python executable ==="
+          hatch run which python
+          echo "=== Python version ==="
+          hatch run python --version
+          echo "=== Installed packages ==="
+          hatch run pip list
+          echo "=== pytest version ==="
+          hatch run pytest --version || echo "pytest not found"
+
       - name: Run tests with coverage
         run: |
-          hatch run pytest --cov=c2md --cov-report=xml -v
+          hatch run pytest --cov=c2md --cov-report=xml -v --tb=short || (echo "Tests failed with exit code $?" && exit 1)
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
