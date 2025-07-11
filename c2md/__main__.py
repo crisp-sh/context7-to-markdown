@@ -2,22 +2,23 @@ import argparse
 import os
 import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Dict, List, Optional
 
 # Import all the processing modules
 try:
-    from .parser import Context7Parser, Context7ParseError
-    from .url_mapper import URLMapper, URLMapperError
     from .file_organizer import FileOrganizer, FileOrganizerError, OrganizedFile
-    from .markdown_writer import MarkdownWriter, MarkdownWriterError
     from .index_generator import IndexGenerator, IndexGeneratorError
+    from .markdown_writer import MarkdownWriter, MarkdownWriterError
+    from .parser import Context7ParseError, Context7Parser
+    from .url_mapper import URLMapper, URLMapperError
 except ImportError:
     # Fallback for direct execution
-    from parser import Context7Parser, Context7ParseError
-    from url_mapper import URLMapper, URLMapperError
+    from parser import Context7ParseError, Context7Parser
+
     from file_organizer import FileOrganizer, FileOrganizerError, OrganizedFile
-    from markdown_writer import MarkdownWriter, MarkdownWriterError
     from index_generator import IndexGenerator, IndexGeneratorError
+    from markdown_writer import MarkdownWriter, MarkdownWriterError
+    from url_mapper import URLMapper, URLMapperError
 
 
 def validate_input_file(file_path: str) -> None:
@@ -33,10 +34,10 @@ def validate_input_file(file_path: str) -> None:
     """
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Input file not found: {file_path}")
-    
+
     if not os.path.isfile(file_path):
         raise ValueError(f"Input path is not a file: {file_path}")
-    
+
     if not os.access(file_path, os.R_OK):
         raise PermissionError(f"Input file is not readable: {file_path}")
 
@@ -75,7 +76,7 @@ def flatten_organized_structure(organized_structure: Dict[str, List[OrganizedFil
     return flattened
 
 
-def print_processing_summary(entries_count: int, files_written: List[str], 
+def print_processing_summary(entries_count: int, files_written: List[str],
                            index_path: Optional[str] = None) -> None:
     """
     Print a summary of the processing results.
@@ -85,15 +86,15 @@ def print_processing_summary(entries_count: int, files_written: List[str],
         files_written: List of written file paths
         index_path: Path to generated index file (if any)
     """
-    print(f"\n✅ Processing complete!")
+    print("\n✅ Processing complete!")
     print(f"📋 Processed {entries_count} Context7 entries")
     print(f"📄 Generated {len(files_written)} markdown files")
-    
+
     if files_written:
-        print(f"📁 Files written to:")
+        print("📁 Files written to:")
         for file_path in sorted(files_written):
             print(f"   • {file_path}")
-    
+
     if index_path:
         print(f"📑 Index generated: {index_path}")
 
@@ -121,98 +122,98 @@ def main():
         output_directory = os.path.join(args.directory, "output")
     else:
         output_directory = os.path.join(os.getcwd(), "output")
-    
+
     try:
         # Step 1: Validate input file
         print(f"🔍 Validating input file: {args.input_file}")
         validate_input_file(args.input_file)
-        
+
         # Step 2: Ensure output directory exists
         print(f"📁 Preparing output directory: {output_directory}")
         ensure_output_directory(output_directory)
-        
+
         # Step 3: Parse Context7 file
-        print(f"📖 Parsing Context7 file...")
+        print("📖 Parsing Context7 file...")
         parser_instance = Context7Parser()
         entries = parser_instance.parse_file(args.input_file)
-        
+
         if not entries:
             print("⚠️  No entries found in the input file.")
             return
-        
+
         print(f"✅ Found {len(entries)} entries")
-        
+
         # Step 4: Organize entries into directory structure
-        print(f"🗂️  Organizing entries into directory structure...")
+        print("🗂️  Organizing entries into directory structure...")
         url_mapper = URLMapper()
         file_organizer = FileOrganizer(url_mapper)
         organized_structure = file_organizer.organize_entries(entries)
-        
+
         # Flatten the organized structure
         organized_files = flatten_organized_structure(organized_structure)
         print(f"✅ Organized {len(organized_files)} files across {len(organized_structure)} directories")
-        
+
         # Step 5: Write markdown files
-        print(f"✍️  Writing markdown files...")
+        print("✍️  Writing markdown files...")
         markdown_writer = MarkdownWriter(output_directory)
         written_files = markdown_writer.write_files(organized_files)
-        
+
         # Step 6: Generate index if requested
         index_path = None
         if args.tree:
-            print(f"📑 Generating table of contents index...")
+            print("📑 Generating table of contents index...")
             index_generator = IndexGenerator(output_directory)
-            
+
             # Convert written files to relative paths for index
             relative_paths = []
             for file_path in written_files:
                 rel_path = os.path.relpath(file_path, output_directory)
                 relative_paths.append(rel_path)
-            
+
             index_path = index_generator.generate_index(relative_paths)
-            
+
         # Step 7: Print summary
         print_processing_summary(len(entries), written_files, index_path)
-        
+
     except Context7ParseError as e:
         print(f"❌ Parsing error: {e}", file=sys.stderr)
         print("💡 Please check that your input file is in valid Context7 format.", file=sys.stderr)
         sys.exit(1)
-        
+
     except FileOrganizerError as e:
         print(f"❌ File organization error: {e}", file=sys.stderr)
         print("💡 Please check that your Context7 entries have valid SOURCE URLs.", file=sys.stderr)
         sys.exit(1)
-        
+
     except MarkdownWriterError as e:
         print(f"❌ Markdown writing error: {e}", file=sys.stderr)
         print("💡 Please check output directory permissions.", file=sys.stderr)
         sys.exit(1)
-        
+
     except IndexGeneratorError as e:
         print(f"❌ Index generation error: {e}", file=sys.stderr)
         print("💡 Index generation failed, but markdown files were created successfully.", file=sys.stderr)
         # Don't exit here, as the main processing succeeded
-        
+
     except URLMapperError as e:
         print(f"❌ URL mapping error: {e}", file=sys.stderr)
         print("💡 Please check that your Context7 entries have valid SOURCE URLs.", file=sys.stderr)
         sys.exit(1)
-        
+
     except FileNotFoundError as e:
         print(f"❌ File not found: {e}", file=sys.stderr)
         print("💡 Please check that the input file path is correct.", file=sys.stderr)
         sys.exit(1)
-        
+
     except PermissionError as e:
         print(f"❌ Permission error: {e}", file=sys.stderr)
         print("💡 Please check file and directory permissions.", file=sys.stderr)
         sys.exit(1)
-        
+
     except ValueError as e:
         print(f"❌ Invalid input: {e}", file=sys.stderr)
         sys.exit(1)
-        
+
     except Exception as e:
         print(f"❌ Unexpected error: {e}", file=sys.stderr)
         print("💡 Please check your input file and try again.", file=sys.stderr)

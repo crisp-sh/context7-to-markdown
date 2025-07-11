@@ -18,7 +18,7 @@ class URLMapperError(Exception):
 
 class URLMapper:
     """Maps SOURCE URLs to directory paths for file organization."""
-    
+
     # Common documentation URL patterns
     DOCS_PATTERNS = [
         r'/docs/?',
@@ -27,11 +27,11 @@ class URLMapper:
         r'/api/(?=(?:docs?|reference))',  # Only match /api/ when followed by docs or reference
         r'/reference/?'
     ]
-    
+
     def __init__(self):
         """Initialize the URL mapper."""
         pass
-    
+
     def extract_path(self, source_url: str) -> str:
         """
         Extract directory path from a SOURCE URL.
@@ -52,16 +52,16 @@ class URLMapper:
         """
         if not source_url or not isinstance(source_url, str):
             raise URLMapperError("Source URL must be a non-empty string")
-        
+
         # Clean and validate URL
         url = source_url.strip()
         if not self._is_valid_url(url):
             raise URLMapperError(f"Invalid URL format: {url}")
-        
+
         try:
             parsed_url = urlparse(url)
             path = parsed_url.path
-            
+
             # Extract path after documentation directory
             docs_path = self._extract_docs_path(path)
             if docs_path is None:
@@ -72,20 +72,20 @@ class URLMapper:
             elif docs_path == '':
                 # Empty path after docs pattern - return empty string
                 return ''
-            
+
             # Clean and format the path
             formatted_path = self._format_path(docs_path)
-            
+
             if not formatted_path and docs_path:
                 raise URLMapperError(f"No valid path extracted from URL: {url}")
-                
+
             return formatted_path
-            
+
         except Exception as e:
             if isinstance(e, URLMapperError):
                 raise
             raise URLMapperError(f"Error parsing URL {url}: {str(e)}")
-    
+
     def extract_main_directory(self, source_url: str) -> str:
         """
         Extract just the main directory (first level) from SOURCE URL.
@@ -102,7 +102,7 @@ class URLMapper:
         """
         full_path = self.extract_path(source_url)
         return full_path.split('/')[0] if full_path else ''
-    
+
     def extract_file_path(self, source_url: str) -> Tuple[str, str]:
         """
         Extract both directory and filename components from SOURCE URL.
@@ -127,7 +127,7 @@ class URLMapper:
         else:
             # Single level - treat as both directory and filename
             return ('', full_path)
-    
+
     def _is_valid_url(self, url: str) -> bool:
         """
         Validate if the URL is properly formatted.
@@ -144,7 +144,7 @@ class URLMapper:
             return result.scheme in ('http', 'https') and bool(result.netloc)
         except Exception:
             return False
-    
+
     def _extract_docs_path(self, url_path: str) -> Optional[str]:
         """
         Extract the path after documentation directory patterns.
@@ -162,9 +162,9 @@ class URLMapper:
                 start_index = match.end()
                 remaining_path = url_path[start_index:].lstrip('/')
                 return remaining_path  # Return empty string if nothing after pattern
-        
+
         return None
-    
+
     def _format_path(self, path: str) -> str:
         """
         Format and clean the extracted path.
@@ -177,10 +177,10 @@ class URLMapper:
         """
         if not path:
             return ''
-        
+
         # Remove leading/trailing slashes and normalize
         path = path.strip('/')
-        
+
         # Split, clean, and rejoin path segments
         segments = []
         for segment in path.split('/'):
@@ -192,27 +192,27 @@ class URLMapper:
                 cleaned = cleaned.strip('-')  # Remove leading/trailing hyphens
                 if cleaned:
                     segments.append(cleaned)
-        
+
         return '/'.join(segments)
-    
+
     def get_numbered_filename(self, source_url: str, number: int) -> str:
         """
         Generate a numbered filename from SOURCE URL.
-        
+
         Args:
             source_url: The SOURCE URL from a Context7 entry
             number: Sequential number for the file
-            
+
         Returns:
             Formatted filename with number prefix
-            
+
         Examples:
-            ('https://neon.com/docs/data-api/get-started', 1) → '001-get-started.md'
+            URL with number 1 → '001-get-started.md'
         """
         _, filename = self.extract_file_path(source_url)
         if not filename:
             filename = 'untitled'
-        
+
         # Format number with zero padding (3 digits)
         padded_number = f"{number:03d}"
         return f"{padded_number}-{filename}.md"
@@ -221,13 +221,13 @@ class URLMapper:
 def extract_directory_path(source_url: str) -> str:
     """
     Convenience function to extract directory path from SOURCE URL.
-    
+
     Args:
         source_url: SOURCE URL from Context7 entry
-        
+
     Returns:
         Directory path for file organization
-        
+
     Raises:
         URLMapperError: If URL mapping fails
     """
@@ -238,10 +238,10 @@ def extract_directory_path(source_url: str) -> str:
 def extract_main_directory(source_url: str) -> str:
     """
     Convenience function to extract main directory from SOURCE URL.
-    
+
     Args:
         source_url: SOURCE URL from Context7 entry
-        
+
     Returns:
         Main directory name
     """

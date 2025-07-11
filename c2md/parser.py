@@ -7,7 +7,7 @@ metadata fields (TITLE, DESCRIPTION, SOURCE, LANGUAGE) followed by code content.
 """
 
 import re
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 class Context7ParseError(Exception):
@@ -17,18 +17,18 @@ class Context7ParseError(Exception):
 
 class Context7Parser:
     """Parser for Context7 format text files."""
-    
+
     # Delimiter that separates entries
     ENTRY_DELIMITER = "----------------------------------------"
-    
+
     # Metadata field patterns
     METADATA_FIELDS = {
         'title': r'^TITLE:\s*(.*)$',
-        'description': r'^DESCRIPTION:\s*(.*)$', 
+        'description': r'^DESCRIPTION:\s*(.*)$',
         'source': r'^SOURCE:\s*(.*)$',
         'language': r'^LANGUAGE:\s*(.*)$'
     }
-    
+
     def __init__(self):
         """Initialize the parser."""
         self.entries = []
@@ -57,7 +57,7 @@ class Context7Parser:
             FileNotFoundError: If file does not exist
         """
         try:
-            with open(file_path, 'r', encoding='utf-8') as file:
+            with open(file_path, encoding='utf-8') as file:
                 content = file.read()
             return self.parse_content(content)
         except FileNotFoundError:
@@ -77,15 +77,15 @@ class Context7Parser:
         """
         self.entries = []
         self.original_order = 0
-        
+
         # Split content by delimiter
         raw_entries = content.split(self.ENTRY_DELIMITER)
-        
+
         for raw_entry in raw_entries:
             raw_entry = raw_entry.strip()
             if not raw_entry:  # Skip empty entries
                 continue
-                
+
             try:
                 parsed_entry = self._parse_single_entry(raw_entry)
                 if parsed_entry:  # Only add if parsing was successful
@@ -94,7 +94,7 @@ class Context7Parser:
                 # Log malformed entry but continue processing
                 print(f"Warning: Skipping malformed entry at position {self.original_order}: {str(e)}")
                 continue
-        
+
         return self.entries
 
     def _parse_single_entry(self, entry_text: str) -> Optional[Dict[str, Any]]:
@@ -116,16 +116,16 @@ class Context7Parser:
             'code': '',
             'original_order': self.original_order
         }
-        
+
         self.original_order += 1
-        
+
         # Parse metadata fields
         code_start_index = None
         current_field = None
-        
+
         for i, line in enumerate(lines):
             line = line.strip()
-            
+
             # Check for metadata fields
             field_found = False
             for field_name, pattern in self.METADATA_FIELDS.items():
@@ -135,14 +135,14 @@ class Context7Parser:
                     current_field = field_name
                     field_found = True
                     break
-            
+
             # Check for CODE: marker
             if re.match(r'^CODE:\s*$', line, re.IGNORECASE):
                 code_start_index = i + 1
                 current_field = 'code'
                 field_found = True
                 continue
-            
+
             # Handle multi-line descriptions and continuation of fields
             if not field_found and current_field and line:
                 if current_field == 'description':
@@ -151,7 +151,7 @@ class Context7Parser:
                         entry_data['description'] += ' ' + line
                     else:
                         entry_data['description'] = line
-        
+
         # Extract code content
         if code_start_index is not None:
             code_lines = lines[code_start_index:]
@@ -160,13 +160,13 @@ class Context7Parser:
                 code_lines.pop(0)
             while code_lines and not code_lines[-1].strip():
                 code_lines.pop()
-            
+
             entry_data['code'] = '\n'.join(code_lines)
-        
+
         # Validate required fields
         if not self._validate_entry(entry_data):
             return None
-            
+
         return entry_data
 
     def _validate_entry(self, entry_data: Dict[str, Any]) -> bool:
@@ -182,16 +182,16 @@ class Context7Parser:
         # At minimum, we need a title and source
         if not entry_data.get('title') or not entry_data.get('source'):
             return False
-        
+
         # Title should not be empty or just whitespace
         if not entry_data['title'].strip():
             return False
-            
+
         # Source should look like a URL (basic validation)
         source = entry_data['source'].strip()
         if not (source.startswith('http://') or source.startswith('https://')):
             return False
-            
+
         return True
 
     @staticmethod
