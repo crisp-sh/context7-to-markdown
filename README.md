@@ -34,7 +34,7 @@ uvx c2md
 pip install c2md
 ```
 
-### Using uv (recommended for faster installation)
+### Using uv
 
 ```bash
 uv pip install c2md
