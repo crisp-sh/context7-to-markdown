@@ -1,15 +1,28 @@
 # Context7 to Markdown Converter
 
-A powerful CLI tool that converts Context7 format files to organized markdown documentation with automatic directory structure and table of contents generation.
+A blazing fast CLI tool that converts Context7 formatted llms.txt files to organized markdown documentation with automatic directory structure, multi-language support, and table of contents generation. 
+
+> Only caveat is Context7 does not have an open API at the moment, so you must download the raw llms.txt.
+> 
+> For example, [context7.com/vercel/next.js/llms.txt](https://context7.com/vercel/next.js/llms.txt).
+
+Install with pip
+```bash
+pip install c2md
+```
+Install with uv
+```bash
+uv pip install c2md
+```
 
 ## ✨ Features
 
-- **Convert Context7 to Markdown**: Transform Context7 format files into clean, organized markdown documentation
-- **Smart Organization**: Automatically organizes files into logical directory structures based on source URLs
-- **Table of Contents**: Generates comprehensive index files for easy navigation
-- **URL Mapping**: Intelligently maps source URLs to appropriate file paths and names
-- **Error Handling**: Robust error handling with detailed feedback for troubleshooting
-- **Cross-Platform**: Works on Windows, macOS, and Linux
+- **⚓ Convert Context7 to Markdown**: Transform Context7 format files into clean, organized markdown documentation
+- **🧠 Smart Organization**: Automatically organizes files into logical directory structures based on source URLs.
+- **🗨️ Multi-Language Support**: Consolidates multi-language sections into a single document.
+- **📜 Table of Contents**: Generates comprehensive index files for easy navigation and providing the context to your agent.
+- **🗺️ URL Mapping**: Intelligently maps source URLs to appropriate file paths and names
+- **❌ Error Handling**: Robust error handling with detailed feedback for troubleshooting
 
 ## 🚀 Installation
 
@@ -43,25 +56,26 @@ pip install -e .
 
 ## 🛠️ Usage
 
-After installation, use the `c2md` command to convert your Context7 files:
+After installation, use the `c2md` command:
 
 ### Basic Usage
 
 ```bash
-c2md input.context7
+# output defaults to ./output/
+c2md /path/to/llms.txt
 ```
 
 ### Advanced Usage
 
 ```bash
-# Specify output directory
-c2md input.context7 -d /path/to/output
+# Specify output directory, 001-index.md (ToC) generated in output root
+c2md /path/to/llms.txt -d /path/to/output
 
-# Disable table of contents generation
-c2md input.context7 --no-tree
+# Disable ToC generation
+c2md /path/to/llms.txt --no-tree
 
-# Full example with all options
-c2md my-documentation.context7 -d ./docs --tree
+# Full example with all options, no ToC/tree
+c2md /path/to/llms.txt -d /path/to/output --no-tree
 ```
 
 ### Command Line Options
@@ -78,16 +92,16 @@ The tool creates an organized directory structure:
 
 ```
 output/
-├── index.md                    # Table of contents (if enabled)
+├── 001-index.md                    # Table of contents (if enabled)
 ├── domain1.com/
 │   ├── section1/
-│   │   ├── page1.md
-│   │   └── page2.md
+│   │   ├── 001-page1.md
+│   │   └── 002-page2.md
 │   └── section2/
-│       └── page3.md
+│       └── 001-page3.md
 └── domain2.com/
     └── docs/
-        └── guide.md
+        └── 001-guide.md
 ```
 
 ## 🎯 Context7 Format
@@ -96,47 +110,7 @@ The tool processes Context7 format files, which should contain entries with:
 - **SOURCE**: URL or source identifier
 - **CONTENT**: The actual content to be converted
 - **TITLE**: Optional title for the content
-
-Example Context7 format:
-```
-SOURCE: https://example.com/docs/getting-started
-TITLE: Getting Started Guide
-CONTENT: # Getting Started
-This is the main content...
-
----
-
-SOURCE: https://example.com/api/reference
-TITLE: API Reference
-CONTENT: # API Reference
-API documentation content...
-```
-
-## 🔧 Examples
-
-### Convert a simple Context7 file
-
-```bash
-c2md documentation.context7
-```
-
-This will:
-1. Parse the Context7 file
-2. Create an `output/` directory
-3. Generate organized markdown files
-4. Create an `index.md` table of contents
-
-### Convert with custom output directory
-
-```bash
-c2md docs.context7 -d ./website/content
-```
-
-### Convert without table of contents
-
-```bash
-c2md docs.context7 --no-tree
-```
+- **LANGUAGE**: Denotes a multi-language document
 
 ## 🏗️ Architecture
 
@@ -193,39 +167,9 @@ hatch run release minor
 hatch run release major
 ```
 
-### Release Process
-
-The release script automatically:
-1. Checks that your working directory is clean
-2. Runs the test suite
-3. Updates the version in [`c2md/__init__.py`](c2md/__init__.py:5)
-4. Creates a signed Git commit
-5. Creates a signed Git tag
-6. Pushes to GitHub, triggering the automated release workflow
-
-### Custom Release Message
-
-```bash
-hatch run release patch -m "Fix critical bug in URL parsing"
-```
-
-### Dry Run
-
-```bash
-hatch run release patch --dry-run
-```
-
-### Requirements
-
-- Git signing must be configured (see [docs/RELEASE_SETUP.md](docs/RELEASE_SETUP.md))
-- Tests must pass
-- Working directory must be clean
-
-For detailed setup instructions, see [docs/RELEASE_SETUP.md](docs/RELEASE_SETUP.md).
-
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a PR if you would like to contribute or have an issue.
 
 ### Development Setup
 
@@ -238,10 +182,7 @@ cd context7-to-markdown
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install in development mode
-pip install -e .
-
-# Install development dependencies
+# Install
 pip install -e .
 ```
 
@@ -258,27 +199,6 @@ hatch run test tests/test_specific.py
 hatch run test-cov
 ```
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## 🐛 Bug Reports
 
 If you encounter any issues, please report them on the [GitHub Issues](https://github.com/crisp-sh/context7-to-markdown/issues) page.
-
-## 📚 Documentation
-
-For more detailed documentation, visit our [documentation site](https://github.com/crisp-sh/context7-to-markdown/docs).
-
-## 🔄 Changelog
-
-### v0.1.0
-- Initial release
-- Basic Context7 to Markdown conversion
-- Directory organization based on source URLs
-- Table of contents generation
-- CLI interface with `c2md` command
-
----
-
-Made with ❤️ by [crisp.sh](https://crisp.sh)
