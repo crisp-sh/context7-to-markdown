@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "context7-to-markdown"
+name = "c2md"
 version = "0.1.0"
 description = "CLI tool to convert Context7 llms.txt format to locally organized markdown documentation"
 readme = "README.md"
@@ -36,14 +36,14 @@ dependencies = []
 "Source" = "https://github.com/crisp-sh/context7-to-markdown"
 
 [project.scripts]
-c2md = "context7_to_markdown.__main__:main"
+c2md = "c2md.__main__:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["context7_to_markdown"]
+packages = ["c2md"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "/context7_to_markdown",
+    "/c2md",
     "/README.md",
     "/pyproject.toml",
 ]
@@ -57,7 +57,7 @@ dependencies = [
 
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
-test-cov = "pytest --cov=src/context7_to_markdown {args:tests}"
+test-cov = "pytest --cov=c2md {args:tests}"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -30,7 +30,7 @@ jobs:
 
       # ---------------- Code-quality gates ----------------
       - name: Lint (flake8)
-        run: hatch run flake8 context7_to_markdown
+        run: hatch run flake8 c2md
 
       - name: Style check (black)
         run: hatch run black --check .
@@ -39,7 +39,7 @@ jobs:
         run: hatch run isort --check-only .
 
       - name: Security scan (bandit)
-        run: hatch run bandit -r context7_to_markdown
+        run: hatch run bandit -r c2md
 
       - name: Dependency vulnerability scan (safety)
         run: hatch run safety check --full-report || true
@@ -47,7 +47,7 @@ jobs:
       # ---------------- Tests & coverage ----------------
       - name: Run tests with coverage
         run: |
-          hatch run pytest --cov=context7_to_markdown --cov-report=xml
+          hatch run pytest --cov=c2md --cov-report=xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
