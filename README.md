@@ -14,7 +14,9 @@ Install with uv
 ```bash
 uv pip install c2md
 ```
-
+```bash
+uvx c2md
+```
 ## ✨ Features
 
 - **⚓ Convert Context7 to Markdown**: Transform Context7 format files into clean, organized markdown documentation
@@ -35,7 +37,11 @@ pip install c2md
 ### Using uv (recommended for faster installation)
 
 ```bash
-uv install c2md
+uv pip install c2md
+```
+or
+```bash
+uvx c2md
 ```
 
 ### Development Installation
