@@ -22,7 +22,7 @@ uvx c2md
 - **⚓ Convert Context7 to Markdown**: Transform Context7 format files into clean, organized markdown documentation
 - **🧠 Smart Organization**: Automatically organizes files into logical directory structures based on source URLs.
 - **🗨️ Multi-Language Support**: Consolidates multi-language sections into a single document.
-- **📜 Table of Contents**: Generates comprehensive index files for easy navigation and providing the context to your agent.
+- **📜 Table of Contents**: Generates comprehensive index files to provide context to your agent.
 - **🗺️ URL Mapping**: Intelligently maps source URLs to appropriate file paths and names
 - **❌ Error Handling**: Robust error handling with detailed feedback for troubleshooting
 
