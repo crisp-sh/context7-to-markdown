@@ -93,7 +93,10 @@ class IndexGenerator:
         # Enhance with titles from organized files
         for organized_file in organized_files:
             file_path = organized_file.full_path
-            title = organized_file.entry.get('title', '').strip()
+            if isinstance(organized_file.entry, dict):
+                title = organized_file.entry.get('title', '').strip()
+            else:
+                title = organized_file.entry.main_title
 
             # Find the file in our structure and add title
             directory = os.path.dirname(file_path) or '.'
@@ -173,7 +176,7 @@ class IndexGenerator:
         name = os.path.splitext(filename)[0]
 
         # Remove numbering prefix (e.g., "001-", "002-")
-        name = re.sub(r'^\d+-', '', name)
+        name = re.sub(r'^\d+[-_]*', '', name)
 
         # Replace hyphens and underscores with spaces
         name = name.replace('-', ' ').replace('_', ' ')

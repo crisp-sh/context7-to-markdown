@@ -164,8 +164,12 @@ class FileOrganizer:
 
             return organized_structure
 
+        except FileOrganizerError:
+            # Re-raise specific errors
+            raise
         except Exception as e:
-            raise FileOrganizerError(f"Error organizing entries: {str(e)}")
+            # Wrap generic exceptions
+            raise FileOrganizerError(f"An unexpected error occurred during file organization: {e}") from e
 
     def _group_by_directory(self, entries: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
         """

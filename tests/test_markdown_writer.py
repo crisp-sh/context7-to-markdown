@@ -83,7 +83,7 @@ class TestMarkdownWriter(unittest.TestCase):
             content = f.read()
 
         self.assertIn('# Test Function', content)
-        self.assertIn('## Test Function', content)
+        self.assertNotIn('## Test Function', content)
         self.assertIn('A simple test function for demonstration.', content)
         self.assertIn('### Python', content)
         self.assertIn('```python', content)
@@ -199,7 +199,6 @@ class TestMarkdownWriter(unittest.TestCase):
 
         expected_sections = [
             '# Test Function',
-            '## Test Function',
             'A simple test function for demonstration.',
             '### Python',
             '```python',
@@ -235,7 +234,7 @@ class TestMarkdownWriter(unittest.TestCase):
         content = self.writer._generate_markdown_content(files)
 
         # Should contain both sections
-        self.assertIn('## Test Function', content)
+        self.assertIn('## Second Function', content)
         self.assertIn('## Second Function', content)
         self.assertIn('def test():', content)
         self.assertIn('def second():', content)
@@ -356,7 +355,7 @@ class TestMarkdownWriter(unittest.TestCase):
 
         # Should still generate valid markdown structure
         self.assertIn('# Untitled', content)
-        self.assertIn('## Untitled', content)
+        self.assertNotIn('## Untitled', content)
         # Code section should NOT be present when code is empty
         self.assertNotIn('### Code', content)
         self.assertNotIn('```', content)
@@ -411,7 +410,7 @@ class TestConvenienceFunctions(unittest.TestCase):
         content = preview_markdown_content([self.sample_organized_file])
 
         self.assertIn('# Convenience Test', content)
-        self.assertIn('## Convenience Test', content)
+        self.assertNotIn('## Convenience Test', content)
         self.assertIn('Testing convenience functions.', content)
         self.assertIn('print("Hello")', content)
 

@@ -250,7 +250,7 @@ class MarkdownWriter:
                 main_title = 'Untitled'
 
         # Start building content
-        content_parts = [f"# {main_title}\n"]
+        content_parts = [f"# {main_title}"]
 
         # Add each entry as a section
         for organized_file in verified_files:
@@ -264,7 +264,14 @@ class MarkdownWriter:
             # For multiple entries, add entry title as h2
             if len(verified_files) > 1:
                 title = entry.get('title', '').strip() or 'Untitled'
-                content_parts.append(f"## {title}\n")
+                content_parts.append(f"\n## {title}")
+            elif len(verified_files) == 1:
+                pass
+            elif len(verified_files) == 1:
+                pass
+            if len(verified_files) > 1:
+                title = entry.get('title', '').strip() or 'Untitled'
+                content_parts.append(f"\n## {title}")
 
             # Add description if present
             description = entry.get('description', '').strip()

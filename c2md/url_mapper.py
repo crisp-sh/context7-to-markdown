@@ -22,6 +22,7 @@ class URLMapper:
     # Common documentation URL patterns
     DOCS_PATTERNS = [
         r'/docs/?',
+        r'/doc/?',
         r'/documentation/?',
         r'/guide/?',
         r'/api/(?=(?:docs?|reference))',  # Only match /api/ when followed by docs or reference

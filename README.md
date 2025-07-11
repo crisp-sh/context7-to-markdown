@@ -2,9 +2,9 @@
 
 A blazing fast CLI tool that converts Context7 formatted llms.txt files to organized markdown documentation with automatic directory structure, multi-language support, and table of contents generation. 
 
-> Only caveat is Context7 does not have an open API at the moment, so you must download the raw llms.txt.
+> Only caveat is Context7 does not have an open API at the moment, so you must download the raw llms.txt and you MUST add or specify the tokens query to be >= the total number of tokens.
 > 
-> For example, [context7.com/vercel/next.js/llms.txt](https://context7.com/vercel/next.js/llms.txt).
+> For example, [context7.com/context7/neon/llms.txt?tokens=519821](https://context7.com/context7/neon/llms.txt?tokens=519821).
 
 Install with pip
 ```bash
@@ -25,6 +25,14 @@ uvx c2md
 - **📜 Table of Contents**: Generates comprehensive index files for easy navigation and providing the context to your agent.
 - **🗺️ URL Mapping**: Intelligently maps source URLs to appropriate file paths and names
 - **❌ Error Handling**: Robust error handling with detailed feedback for troubleshooting
+
+## Why `c2md`?
+
+MCP is clunky, slow, adds additional prompt context, and time consuming. 
+
+With `c2md`, you can pass a specific section of a technology's documentation to an agent. Instead of fairly unreliable natural language search with the Context7 MCP server, you can just attach the `@/path/to/000-index.md` to your agent. 
+
+Depending on the number of locally available documentation sections/files, this can save tokens/context. For example, the Neon docs have around 240 sections (520,000 tokens), with the total 000-index.md costing around 4,000 tokens; alternatively, calls to the Context7 MCP can cost anywhere from 8,000 to 20,000 tokens.  
 
 ## 🚀 Installation
 

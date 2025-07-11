@@ -152,7 +152,7 @@ class TestFileOrganizer(unittest.TestCase):
     def test_organize_entries_invalid_input(self):
         """Test organizing with invalid input."""
         with self.assertRaises(FileOrganizerError):
-            self.file_organizer.organize_entries("not a list")
+            self.file_organizer.organize_entries("not a list")  # type: ignore
 
     def test_organize_entries_missing_source(self):
         """Test organizing entries with missing source URLs."""
@@ -324,9 +324,9 @@ class TestFileOrganizer(unittest.TestCase):
         api_files = result['api']
 
         # Should be ordered by original_order
-        self.assertEqual(api_files[0].entry['title'], 'First Entry')
-        self.assertEqual(api_files[1].entry['title'], 'Second Entry')
-        self.assertEqual(api_files[2].entry['title'], 'Third Entry')
+        self.assertEqual(api_files[0].entry.main_title if not isinstance(api_files[0].entry, dict) else api_files[0].entry.get('title'), 'First Entry')
+        self.assertEqual(api_files[1].entry.main_title if not isinstance(api_files[1].entry, dict) else api_files[1].entry.get('title'), 'Second Entry')
+        self.assertEqual(api_files[2].entry.main_title if not isinstance(api_files[2].entry, dict) else api_files[2].entry.get('title'), 'Third Entry')
 
         # Numbers should be sequential
         self.assertEqual(api_files[0].number, 1)
@@ -429,11 +429,10 @@ class TestErrorHandling(unittest.TestCase):
         file_organizer = FileOrganizer()
 
         # Mock a method to raise an exception
-        with patch.object(file_organizer, '_group_by_directory', side_effect=Exception("Unexpected error")):
+        with patch.object(file_organizer, '_group_by_source_url', side_effect=Exception("Unexpected error")):
             with self.assertRaises(FileOrganizerError) as context:
-                file_organizer.organize_entries([{'title': 'test'}])
-
-            self.assertIn("Error organizing entries", str(context.exception))
+                file_organizer.organize_entries([{'source': 'http://example.com/page'}])
+            self.assertIn("An unexpected error occurred", str(context.exception))
 
     def test_malformed_entries_handling(self):
         """Test handling of malformed entries."""

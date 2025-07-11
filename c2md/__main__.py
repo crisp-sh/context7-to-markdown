@@ -119,7 +119,7 @@ def main():
     # Determine output directory
     # Always create an "output" subdirectory in the specified or current directory
     if args.directory is not None:
-        output_directory = os.path.join(args.directory, "output")
+        output_directory = args.directory
     else:
         output_directory = os.path.join(os.getcwd(), "output")
 
