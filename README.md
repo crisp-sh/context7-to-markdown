@@ -1,4 +1,4 @@
-# Context7 to Markdown (c2md)
+# Context7 to Markdown (`c2md`)
 
 A blazing fast CLI tool that converts Context7 formatted llms.txt files to organized markdown documentation with automatic directory structure, multi-language support, and table of contents generation. 
 
@@ -26,7 +26,7 @@ uvx c2md
 - **🗺️ URL Mapping**: Intelligently maps source URLs to appropriate file paths and names
 - **❌ Error Handling**: Robust error handling with detailed feedback for troubleshooting
 
-## Why `c2md`?
+## 🤔 Why `c2md`?
 
 MCP is clunky, slow, adds additional prompt context, and time consuming. 
 
