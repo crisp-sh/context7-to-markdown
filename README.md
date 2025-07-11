@@ -157,10 +157,10 @@ Run the test suite:
 pip install -e ".[dev]"
 
 # Run tests
-pytest
+python -m unittest discover tests
 
 # Run tests with coverage
-pytest --cov=context7_to_markdown
+python -m unittest discover tests
 ```
 
 ## 🤝 Contributing
@@ -182,20 +182,17 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -e .
 
 # Install development dependencies
-pip install pytest pytest-cov
+pip install -e .
 ```
 
 ### Running Tests
 
 ```bash
 # Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=context7_to_markdown
+python -m unittest discover tests
 
 # Run specific test file
-pytest tests/test_parser.py
+python -m unittest tests.test___main__
 ```
 
 ## 📄 License
