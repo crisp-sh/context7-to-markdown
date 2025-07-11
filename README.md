@@ -1,4 +1,4 @@
-# Context7 to Markdown Converter (c2md)
+# Context7 to Markdown (c2md)
 
 A blazing fast CLI tool that converts Context7 formatted llms.txt files to organized markdown documentation with automatic directory structure, multi-language support, and table of contents generation. 
 

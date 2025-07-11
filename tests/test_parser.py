@@ -5,20 +5,19 @@ This module contains comprehensive tests for parsing Context7 format files,
 including edge cases, error handling, and malformed entries.
 """
 
-import unittest
-import tempfile
 import os
-from unittest.mock import patch, mock_open
-from typing import List, Dict, Any
-
 import sys
+import tempfile
+import unittest
+from unittest.mock import mock_open, patch
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from c2md.parser import (
-    Context7Parser,
     Context7ParseError,
+    Context7Parser,
+    parse_context7_content,
     parse_context7_file,
-    parse_context7_content
 )
 
 
@@ -45,10 +44,10 @@ CODE:
 print("Hello, World!")
 """
         entries = self.parser.parse_content(content)
-        
+
         self.assertEqual(len(entries), 1)
         entry = entries[0]
-        
+
         self.assertEqual(entry['title'], 'Sample Entry')
         self.assertEqual(entry['description'], 'This is a test entry')
         self.assertEqual(entry['source'], 'https://example.com/docs/sample')
@@ -75,13 +74,13 @@ CODE:
 console.log("Second");
 """
         entries = self.parser.parse_content(content)
-        
+
         self.assertEqual(len(entries), 2)
-        
+
         # Check first entry
         self.assertEqual(entries[0]['title'], 'First Entry')
         self.assertEqual(entries[0]['original_order'], 0)
-        
+
         # Check second entry
         self.assertEqual(entries[1]['title'], 'Second Entry')
         self.assertEqual(entries[1]['language'], 'javascript')
@@ -100,7 +99,7 @@ def complex_function():
     return "complex"
 """
         entries = self.parser.parse_content(content)
-        
+
         self.assertEqual(len(entries), 1)
         expected_desc = "This is a multi-line description that spans several lines and contains detailed information about the entry"
         self.assertEqual(entries[0]['description'], expected_desc)
@@ -114,7 +113,7 @@ LANGUAGE: text
 CODE:
 """
         entries = self.parser.parse_content(content)
-        
+
         self.assertEqual(len(entries), 1)
         self.assertEqual(entries[0]['code'], '')
 
@@ -133,7 +132,7 @@ def function():
     print("end")
 """
         entries = self.parser.parse_content(content)
-        
+
         self.assertEqual(len(entries), 1)
         expected_code = '''def function():
     print("start")
@@ -152,7 +151,7 @@ CODE:
 print("no title")
 """
         entries = self.parser.parse_content(content)
-        
+
         self.assertEqual(len(entries), 0)
 
     def test_skip_malformed_entry_missing_source(self):
@@ -164,7 +163,7 @@ CODE:
 print("no source")
 """
         entries = self.parser.parse_content(content)
-        
+
         self.assertEqual(len(entries), 0)
 
     def test_skip_malformed_entry_invalid_source_url(self):
@@ -177,7 +176,7 @@ CODE:
 print("invalid source")
 """
         entries = self.parser.parse_content(content)
-        
+
         self.assertEqual(len(entries), 0)
 
     def test_parse_mixed_valid_and_invalid_entries(self):
@@ -207,7 +206,7 @@ CODE:
 console.log("valid");
 """
         entries = self.parser.parse_content(content)
-        
+
         # Should only parse the 2 valid entries
         self.assertEqual(len(entries), 2)
         self.assertEqual(entries[0]['title'], 'Valid Entry')
@@ -234,7 +233,7 @@ code:
 print("case test")
 """
         entries = self.parser.parse_content(content)
-        
+
         self.assertEqual(len(entries), 1)
         self.assertEqual(entries[0]['title'], 'Case Test')
         self.assertEqual(entries[0]['language'], 'Python')
@@ -248,7 +247,7 @@ LANGUAGE: python
 CODE:
 print("https")
 """
-        
+
         content_http = """TITLE: HTTP Test
 DESCRIPTION: Testing HTTP URL
 SOURCE: http://example.com/docs/http
@@ -256,24 +255,24 @@ LANGUAGE: python
 CODE:
 print("http")
 """
-        
+
         entries_https = self.parser.parse_content(content_https)
         entries_http = self.parser.parse_content(content_http)
-        
+
         self.assertEqual(len(entries_https), 1)
         self.assertEqual(len(entries_http), 1)
 
     def test_create_sample_entry(self):
         """Test the static method for creating sample entries."""
         sample = Context7Parser.create_sample_entry()
-        
+
         self.assertIn('title', sample)
         self.assertIn('description', sample)
         self.assertIn('source', sample)
         self.assertIn('language', sample)
         self.assertIn('code', sample)
         self.assertIn('original_order', sample)
-        
+
         # Validate sample entry
         self.assertTrue(sample['title'])
         self.assertTrue(sample['source'].startswith('http'))
@@ -287,11 +286,11 @@ LANGUAGE: python
 CODE:
 print("file test")
 """
-        
+
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as temp_file:
             temp_file.write(content)
             temp_file_path = temp_file.name
-        
+
         try:
             entries = self.parser.parse_file(temp_file_path)
             self.assertEqual(len(entries), 1)
@@ -303,17 +302,17 @@ print("file test")
         """Test parsing non-existent file raises error."""
         with self.assertRaises(Context7ParseError) as context:
             self.parser.parse_file('/non/existent/file.txt')
-        
+
         self.assertIn('File not found', str(context.exception))
 
     def test_parse_file_permission_error(self):
         """Test parsing file with permission error."""
         with patch('builtins.open', mock_open()) as mock_file:
             mock_file.side_effect = PermissionError("Permission denied")
-            
+
             with self.assertRaises(Context7ParseError) as context:
                 self.parser.parse_file('/restricted/file.txt')
-            
+
             self.assertIn('Error reading file', str(context.exception))
 
     def test_convenience_function_parse_context7_file(self):
@@ -325,11 +324,11 @@ LANGUAGE: python
 CODE:
 print("convenience")
 """
-        
+
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt') as temp_file:
             temp_file.write(content)
             temp_file_path = temp_file.name
-        
+
         try:
             entries = parse_context7_file(temp_file_path)
             self.assertEqual(len(entries), 1)
@@ -346,7 +345,7 @@ LANGUAGE: python
 CODE:
 print("content")
 """
-        
+
         entries = parse_context7_content(content)
         self.assertEqual(len(entries), 1)
         self.assertEqual(entries[0]['title'], 'Content Test')
@@ -378,10 +377,10 @@ CODE:
 print("3")
 """
         entries = self.parser.parse_content(content)
-        
+
         # Should have 2 valid entries
         self.assertEqual(len(entries), 2)
-        
+
         # But original_order should still reflect all processed entries
         self.assertEqual(entries[0]['original_order'], 0)
         self.assertEqual(entries[1]['original_order'], 2)
@@ -399,7 +398,7 @@ def example():
 ```
 """
         entries = self.parser.parse_content(content)
-        
+
         self.assertEqual(len(entries), 1)
         expected_code = '''```python
 def example():
@@ -418,16 +417,16 @@ CODE:
    print("test")   
 """
         entries = self.parser.parse_content(content)
-        
+
         self.assertEqual(len(entries), 1)
         entry = entries[0]
-        
+
         # Fields should be stripped
         self.assertEqual(entry['title'], 'Whitespace Test')
         self.assertEqual(entry['description'], 'Testing whitespace handling')
         self.assertEqual(entry['source'], 'https://example.com/docs/whitespace')
         self.assertEqual(entry['language'], 'python')
-        
+
         # Code should preserve internal whitespace but trim empty lines
         expected_code = '   # Code with leading/trailing whitespace   \n   print("test")'
         self.assertEqual(entry['code'], expected_code)
@@ -440,7 +439,7 @@ class TestContext7ParseError(unittest.TestCase):
         """Test that Context7ParseError can be created and raised."""
         with self.assertRaises(Context7ParseError) as context:
             raise Context7ParseError("Test error message")
-        
+
         self.assertEqual(str(context.exception), "Test error message")
 
     def test_parse_error_inheritance(self):
@@ -452,10 +451,10 @@ class TestContext7ParseError(unittest.TestCase):
 if __name__ == '__main__':
     # Create a test suite
     suite = unittest.TestLoader().loadTestsFromModule(sys.modules[__name__])
-    
+
     # Run the tests
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
-    
+
     # Exit with appropriate code
     sys.exit(0 if result.wasSuccessful() else 1)

@@ -69,7 +69,8 @@ python_functions = ["test_*"]
 
 # Ruff configuration
 [tool.ruff]
-line-length = 88
+# Allow slightly longer lines to reduce needless E501 violations in generated markdown paths, CLI messages, and tests
+line-length = 120
 target-version = "py38"
 
 [tool.ruff.lint]
@@ -82,7 +83,8 @@ select = [
     "C4", # flake8-comprehensions
     "UP", # pyupgrade
 ]
-ignore = []
+# Ignore rules that are overly strict for this project; we prefer readability for CLI messages
+ignore = ["E501", "B904", "W291", "W293", "B007"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # Allow unused imports in __init__.py files
