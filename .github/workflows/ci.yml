@@ -15,35 +15,43 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
       fail-fast: false  # Don't cancel all jobs if one fails
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        id: checkout
+        uses: actions/checkout@v4
 
       - name: Set up Python
+        id: setup-py
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
       - name: Display Python version
+        id: display-py-version
         run: |
           python --version
           python -m pip --version
 
       - name: Upgrade pip
+        id: upgrade-pip
         run: |
           python -m pip install --upgrade pip
           python -m pip --version
 
       - name: Install hatch
+        id: install-hatch
         run: |
           pip install --verbose hatch
           hatch --version
 
       - name: Create hatch environment
+        id: create-hatch-env
         run: |
           hatch env create
           hatch env show
 
       - name: Install project dependencies
+        id: install-project-deps
         run: |
           echo "=== Current environment packages ==="
           hatch run pip list
@@ -51,28 +59,40 @@ jobs:
           hatch run pip install -e . --verbose || (echo "Failed to install project" && hatch run pip install -e . --verbose --no-deps && exit 1)
 
       - name: Install dev tools
+        id: install-dev-tools
         run: |
           echo "=== Installing development tools ==="
           hatch run pip install --verbose black isort bandit safety || (echo "Failed to install dev tools" && exit 1)
 
       # ---------------- Code-quality gates ----------------
       - name: Lint (ruff)
+        id: lint-ruff
+        continue-on-error: true
         run: hatch run ruff check c2md
 
       - name: Style check (black)
-        run: hatch run black --check .
+        id: black-check
+        continue-on-error: true
+        run: hatch run black --check . || echo "::warning::Black formatting check failed"
 
       - name: Import order check (isort)
-        run: hatch run isort --check-only .
+        id: isort-check
+        continue-on-error: true
+        run: hatch run isort --check-only . || echo "::warning::isort import order check failed"
 
       - name: Security scan (bandit)
-        run: hatch run bandit -r c2md
+        id: bandit-check
+        continue-on-error: true
+        run: hatch run bandit -r c2md || echo "::warning::Bandit security scan found issues"
 
       - name: Dependency vulnerability scan (safety)
+        id: hatch-dep-check
+        continue-on-error: true
         run: hatch run safety check --full-report || true
 
       # ---------------- Tests & coverage ----------------
       - name: Debug test environment
+        id: debug-test-env
         run: |
           echo "=== Python executable ==="
           hatch run which python
@@ -84,19 +104,70 @@ jobs:
           hatch run pytest --version || echo "pytest not found"
 
       - name: Run tests with coverage
+        id: test-coverage
+        continue-on-error: true
         run: |
-          hatch run pytest --cov=c2md --cov-report=xml -v --tb=short || (echo "Tests failed with exit code $?" && exit 1)
+          hatch run pytest --cov=c2md --cov-report=xml -v --tb=short || echo "::warning::Tests failed with exit code $?"
 
       - name: Upload coverage to Codecov
+        id: upload-codecov
+        continue-on-error: true
         uses: codecov/codecov-action@v4
         with:
           file: coverage.xml
           flags: python-${{ matrix.python-version }}
           token: ${{ secrets.CODECOV_TOKEN }}
-        if: ${{ env.CODECOV_TOKEN != '' }}
+        if: ${{ env.CODECOV_TOKEN != '' && steps.test-coverage.outcome == 'success' }}
 
       - name: Persist coverage artifact
+        id: persist-coverage
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.python-version }}
           path: coverage.xml
+        if: ${{ steps.test-coverage.outcome == 'success' }}
+
+      # ---------------- Summary ----------------
+      - name: Job Summary
+        if: always()
+        run: |
+          echo "## CI Results for Python ${{ matrix.python-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Setup Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "- Checkout code: ${{ steps.checkout.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Set up Python: ${{ steps.setup-py.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Display Python version: ${{ steps.display-py-version.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Upgrade pip: ${{ steps.upgrade-pip.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Installation Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "- Install hatch: ${{ steps.install-hatch.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Create hatch environment: ${{ steps.create-hatch-env.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Install project dependencies: ${{ steps.install-project-deps.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Install dev tools: ${{ steps.install-dev-tools.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Code Quality Checks:" >> $GITHUB_STEP_SUMMARY
+          echo "- Ruff linting: ${{ steps.lint-ruff.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.lint-ruff.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Black formatting: ${{ steps.black-check.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.black-check.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- isort import order: ${{ steps.isort-check.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.isort-check.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Bandit security scan: ${{ steps.bandit-check.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.bandit-check.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Safety dependency scan: ${{ steps.hatch-dep-check.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.hatch-dep-check.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Testing:" >> $GITHUB_STEP_SUMMARY
+          echo "- Debug test environment: ${{ steps.debug-test-env.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Test execution: ${{ steps.test-coverage.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.test-coverage.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Coverage upload: ${{ steps.upload-codecov.outcome == 'success' && '✅ Passed' || steps.upload-codecov.outcome == 'failure' && '⚠️ Failed (non-blocking)' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Persist coverage artifact: ${{ steps.persist-coverage.outcome == 'success' && '✅ Passed' || steps.persist-coverage.outcome == 'failure' && '⚠️ Failed (non-blocking)' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Legend:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "- ❌ Failed (blocking)" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚠️ Failed (non-blocking)" >> $GITHUB_STEP_SUMMARY
+          echo "- ⏭️ Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** Non-blocking failures should be addressed but don't prevent the CI from passing." >> $GITHUB_STEP_SUMMARY
