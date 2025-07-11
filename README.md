@@ -1,6 +1,6 @@
 # Context7 to Markdown (`c2md`)
 
-A blazing fast CLI tool that converts Context7 formatted llms.txt files to organized markdown documentation with automatic directory structure, multi-language support, and table of contents generation. 
+A blazing fast CLI tool that converts Context7 formatted llms.txt files to organized markdown documentation with automatic directory structure, multi-language support, and table of contents generation. Supports both local files and direct URLs from Context7.com.
 
 > Only caveat is Context7 does not have an open API at the moment, so you must download the raw llms.txt and you MUST add or specify the tokens query to be >= the total number of tokens.
 > 
@@ -75,8 +75,11 @@ After installation, use the `c2md` command:
 ### Basic Usage
 
 ```bash
-# output defaults to ./output/
+# From local file - output defaults to ./output/
 c2md /path/to/llms.txt
+
+# From Context7 URL (must include tokens parameter)
+c2md https://context7.com/context7/neon/llms.txt?tokens=519821
 ```
 
 ### Advanced Usage
@@ -85,16 +88,19 @@ c2md /path/to/llms.txt
 # Specify output directory, 001-index.md (ToC) generated in output root
 c2md /path/to/llms.txt -d /path/to/output
 
+# From Context7 URL with output directory
+c2md https://context7.com/context7/neon/llms.txt?tokens=519821 -d .docs/neon
+
 # Disable ToC generation
 c2md /path/to/llms.txt --no-tree
 
 # Full example with all options, no ToC/tree
-c2md /path/to/llms.txt -d /path/to/output --no-tree
+c2md https://context7.com/context7/supabase/llms.txt?tokens=1000000 -d /path/to/output --no-tree
 ```
 
 ### Command Line Options
 
-- `input_file`: Path to the Context7 format input file (required)
+- `input_file`: Path to the Context7 format input file or Context7 URL (required)
 - `-d, --directory`: Output directory (default: current directory)
 - `-T, --tree`: Generate table of contents index (default: enabled)
 - `--no-tree`: Disable table of contents generation

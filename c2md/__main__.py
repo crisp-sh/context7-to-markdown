@@ -1,8 +1,17 @@
 import argparse
 import os
+import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
+try:
+    import requests
+except ImportError:
+    print("❌ Error: 'requests' library is required for URL support.", file=sys.stderr)
+    print("💡 Install it with: pip install requests", file=sys.stderr)
+    sys.exit(1)
 
 # Import all the processing modules
 try:
@@ -40,6 +49,152 @@ def validate_input_file(file_path: str) -> None:
 
     if not os.access(file_path, os.R_OK):
         raise PermissionError(f"Input file is not readable: {file_path}")
+
+
+def is_url(input_string: str) -> bool:
+    """
+    Check if the input string is a URL.
+    
+    Args:
+        input_string: The input string to check
+        
+    Returns:
+        True if the input is a URL, False otherwise
+    """
+    try:
+        result = urlparse(input_string)
+        return all([result.scheme, result.netloc])
+    except Exception:
+        return False
+
+
+def validate_and_transform_context7_url(url: str) -> Tuple[bool, str]:
+    """
+    Validate and transform context7.com URLs to the correct format.
+    
+    Valid patterns:
+    - https://context7.com/{org}/{project}/llms.txt
+    - https://context7.com/{org}/{project} (will be transformed)
+    
+    Invalid patterns:
+    - https://context7.com/{project}/llms.txt (missing org)
+    
+    Args:
+        url: URL to validate and transform
+        
+    Returns:
+        Tuple of (is_valid, transformed_url)
+    """
+    try:
+        parsed = urlparse(url)
+        
+        # Check domain
+        if parsed.netloc != 'context7.com':
+            return False, ""
+        
+        # Clean path and split into segments
+        path = parsed.path.strip('/')
+        segments = [s for s in path.split('/') if s]
+        
+        # Need at least 2 segments: org/user and project
+        if len(segments) < 2:
+            return False, ""
+        
+        # Check if the last segment is llms.txt
+        if segments[-1] == 'llms.txt':
+            # If it ends with llms.txt, we need exactly 3 segments (org/project/llms.txt)
+            if len(segments) != 3:
+                return False, ""  # Wrong number of segments
+            org, project = segments[0], segments[1]
+        elif len(segments) == 2:
+            # This is the short format (org/project), needs transformation
+            org, project = segments[0], segments[1]
+        else:
+            # Invalid format - too many segments without llms.txt
+            return False, ""
+        
+        # Build the correct URL
+        correct_path = f"/{org}/{project}/llms.txt"
+        
+        # Build URL with updated path
+        transformed = urlunparse((
+            parsed.scheme,
+            parsed.netloc,
+            correct_path,
+            parsed.params,
+            parsed.query,
+            parsed.fragment
+        ))
+        
+        # Ensure tokens parameter
+        transformed = ensure_tokens_parameter(transformed)
+        
+        return True, transformed
+    except Exception:
+        return False, ""
+
+
+def ensure_tokens_parameter(url: str) -> str:
+    """
+    Ensure the URL has a tokens parameter, adding default if missing.
+    
+    Args:
+        url: The input URL
+        
+    Returns:
+        URL with tokens parameter
+    """
+    parsed = urlparse(url)
+    query_params = parse_qs(parsed.query)
+    
+    # If tokens parameter doesn't exist, add default
+    if 'tokens' not in query_params:
+        query_params['tokens'] = ['999999999']
+    
+    # Rebuild the URL with updated query
+    new_query = urlencode(query_params, doseq=True)
+    new_parsed = parsed._replace(query=new_query)
+    return urlunparse(new_parsed)
+
+
+def download_context7_content(url: str) -> str:
+    """
+    Download content from a context7.com URL.
+    
+    Args:
+        url: The context7.com URL to download from
+        
+    Returns:
+        The downloaded content
+        
+    Raises:
+        RuntimeError: If download fails
+    """
+    try:
+        # Add tokens parameter if missing
+        url_with_tokens = ensure_tokens_parameter(url)
+        
+        print(f"🌐 Downloading from: {url_with_tokens}")
+        
+        # Set a reasonable timeout and headers
+        headers = {
+            'User-Agent': 'c2md-cli/1.0'
+        }
+        
+        response = requests.get(url_with_tokens, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        print(f"✅ Successfully downloaded {len(response.content)} bytes")
+        return response.text
+        
+    except requests.exceptions.HTTPError as e:
+        raise RuntimeError(f"HTTP error downloading content: {e}")
+    except requests.exceptions.ConnectionError as e:
+        raise RuntimeError(f"Connection error: {e}")
+    except requests.exceptions.Timeout as e:
+        raise RuntimeError(f"Request timed out: {e}")
+    except Exception as e:
+        raise RuntimeError(f"Failed to download content: {e}")
 
 
 def ensure_output_directory(output_dir: str) -> None:
@@ -104,7 +259,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Convert Context7 format to organized markdown documentation"
     )
-    parser.add_argument("input_file", help="Context7 generated llms.txt file")
+    parser.add_argument("input", help="Context7 generated llms.txt file or context7.com URL")
     parser.add_argument(
         "-d", "--directory", default=None, help="Output directory (default: ./output)"
     )
@@ -124,18 +279,46 @@ def main():
         output_directory = os.path.join(os.getcwd(), "output")
 
     try:
-        # Step 1: Validate input file
-        print(f"🔍 Validating input file: {args.input_file}")
-        validate_input_file(args.input_file)
-
-        # Step 2: Ensure output directory exists
-        print(f"📁 Preparing output directory: {output_directory}")
-        ensure_output_directory(output_directory)
-
-        # Step 3: Parse Context7 file
-        print("📖 Parsing Context7 file...")
-        parser_instance = Context7Parser()
-        entries = parser_instance.parse_file(args.input_file)
+        # Step 1: Check if input is a URL or file
+        if is_url(args.input):
+            # Handle URL input
+            print(f"🔍 Validating URL: {args.input}")
+            
+            # Validate and transform the URL
+            is_valid, transformed_url = validate_and_transform_context7_url(args.input)
+            if not is_valid:
+                raise ValueError(
+                    "Invalid URL. Only context7.com URLs in the format:\n"
+                    "  - https://context7.com/{org}/{project}/llms.txt\n"
+                    "  - https://context7.com/{org}/{project}\n"
+                    "are supported.\n"
+                    f"Example: https://context7.com/vercel/next.js"
+                )
+            
+            # Download content with transformed URL
+            content = download_context7_content(transformed_url)
+            
+            # Step 2: Ensure output directory exists
+            print(f"📁 Preparing output directory: {output_directory}")
+            ensure_output_directory(output_directory)
+            
+            # Step 3: Parse Context7 content
+            print("📖 Parsing Context7 content...")
+            parser_instance = Context7Parser()
+            entries = parser_instance.parse_content(content)
+        else:
+            # Handle file input (existing logic)
+            print(f"🔍 Validating input file: {args.input}")
+            validate_input_file(args.input)
+            
+            # Step 2: Ensure output directory exists
+            print(f"📁 Preparing output directory: {output_directory}")
+            ensure_output_directory(output_directory)
+            
+            # Step 3: Parse Context7 file
+            print("📖 Parsing Context7 file...")
+            parser_instance = Context7Parser()
+            entries = parser_instance.parse_file(args.input)
 
         if not entries:
             print("⚠️  No entries found in the input file.")
