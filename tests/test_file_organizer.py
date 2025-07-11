@@ -13,8 +13,8 @@ import sys
 # Add src to Python path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from file_organizer import FileOrganizer, OrganizedFile, FileOrganizerError, organize_context7_entries
-from url_mapper import URLMapper
+from c2md.file_organizer import FileOrganizer, OrganizedFile, FileOrganizerError, organize_context7_entries
+from c2md.url_mapper import URLMapper
 
 
 class TestOrganizedFile(unittest.TestCase):

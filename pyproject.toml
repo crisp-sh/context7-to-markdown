@@ -1,11 +1,66 @@
-[tool.poetry]
-name = "context7-to-markdown-docs"
-version = "1.0.0"
-description = "CLI tool to convert Context7 format to markdown documentation"
-authors = ["Your Name <you@example.com>"]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry.dependencies]
-python = "^3.8"
+[project]
+name = "context7-to-markdown"
+version = "0.1.0"
+description = "CLI tool to convert Context7 llms.txt format to locally organized markdown documentation"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "crisp.sh", email = "s@crisp.sh"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Documentation",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+keywords = ["context7", "markdown", "documentation", "cli", "converter"]
+requires-python = ">=3.8"
+dependencies = []
 
-[tool.poetry.scripts]
-context7-to-markdown = "context7_to_markdown.__main__:main"
+[project.urls]
+"Homepage" = "https://github.com/crisp-sh/context7-to-markdown"
+"Bug Reports" = "https://github.com/crisp-sh/context7-to-markdown/issues"
+"Source" = "https://github.com/crisp-sh/context7-to-markdown"
+
+[project.scripts]
+c2md = "context7_to_markdown.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["context7_to_markdown"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/context7_to_markdown",
+    "/README.md",
+    "/pyproject.toml",
+]
+
+# Development tools configuration
+[tool.hatch.envs.default]
+dependencies = [
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "pytest --cov=src/context7_to_markdown {args:tests}"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

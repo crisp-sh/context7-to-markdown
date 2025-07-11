@@ -14,7 +14,7 @@ from typing import List, Dict, Any
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from parser import (
+from c2md.parser import (
     Context7Parser,
     Context7ParseError,
     parse_context7_file,

@@ -12,9 +12,9 @@ from typing import List, Dict, Any, Optional, Union
 from pathlib import Path
 
 try:
-    from .file_organizer import OrganizedFile
+    from .file_organizer import OrganizedFile, ConsolidatedEntry
 except ImportError:
-    from file_organizer import OrganizedFile
+    from file_organizer import OrganizedFile, ConsolidatedEntry
 
 
 class MarkdownWriterError(Exception):
@@ -152,23 +152,119 @@ class MarkdownWriter:
         # Sort files by their number to maintain order
         sorted_files = sorted(organized_files, key=lambda f: f.number)
         
+        # Check if we have consolidated entries
+        first_entry = sorted_files[0].entry
+        if isinstance(first_entry, ConsolidatedEntry):
+            # Handle consolidated entry
+            return self._generate_consolidated_markdown_content(sorted_files)
+        else:
+            # Handle regular entries
+            return self._generate_regular_markdown_content(sorted_files)
+    
+    def _generate_consolidated_markdown_content(self, organized_files: List[OrganizedFile]) -> str:
+        """
+        Generate markdown content for consolidated entries.
+        
+        Args:
+            organized_files: List of OrganizedFile instances with ConsolidatedEntry
+            
+        Returns:
+            Complete markdown content as string
+        """
+        if not organized_files:
+            return ""
+        
+        # For consolidated entries, we should have only one organized file
+        consolidated_entry = organized_files[0].entry
+        if not isinstance(consolidated_entry, ConsolidatedEntry):
+            raise MarkdownWriterError("Expected ConsolidatedEntry but got different type")
+        
+        content_parts = []
+        
+        # Add main title as H1
+        content_parts.append(f"# {consolidated_entry.main_title}\n")
+        
+        # Add each language variant as H2 section
+        for variant in consolidated_entry.language_variants:
+            # Add language variant title as H2
+            language = variant.get('language', '').lower()
+            clean_language = self._clean_language_identifier(language)
+            language_title = clean_language.title() if clean_language else 'Code'
+            content_parts.append(f"## {language_title}\n")
+            
+            # Add description if present
+            description = variant.get('description', '').strip()
+            if description:
+                content_parts.append(f"{description}\n")
+            
+            # Add code block if present
+            code = variant.get('code', '').strip()
+            if code:
+                clean_code = self._clean_code_content(code)
+                content_parts.append(f"```{clean_language}\n{clean_code}\n```\n")
+        
+        # Add source attribution
+        if consolidated_entry.source_url:
+            content_parts.append("---\n")
+            content_parts.append(f"*Source: {consolidated_entry.source_url}*\n")
+        
+        return "\n".join(content_parts)
+    
+    def _generate_regular_markdown_content(self, organized_files: List[OrganizedFile]) -> str:
+        """
+        Generate markdown content for regular entries.
+        
+        Args:
+            organized_files: List of OrganizedFile instances with regular dict entries
+            
+        Returns:
+            Complete markdown content as string
+        """
+        if not organized_files:
+            return ""
+        
+        # Sort files by their number to maintain order
+        sorted_files = sorted(organized_files, key=lambda f: f.number)
+        
+        # Verify we have regular dict entries and cast to Dict for type safety
+        verified_files = []
+        for organized_file in sorted_files:
+            if isinstance(organized_file.entry, ConsolidatedEntry):
+                raise MarkdownWriterError("Expected regular dict entry but got ConsolidatedEntry")
+            # After verification, we know it's a Dict[str, Any]
+            verified_files.append(organized_file)
+        
         # Generate main title
-        if len(sorted_files) == 1:
-            main_title = sorted_files[0].entry.get('title', '').strip() or 'Untitled'
+        if len(verified_files) == 1:
+            first_entry = verified_files[0].entry
+            if isinstance(first_entry, dict):
+                main_title = first_entry.get('title', '').strip() or 'Untitled'
+            else:
+                main_title = 'Untitled'
         else:
             # For multiple entries, use a combined title or the first entry's title
-            main_title = sorted_files[0].entry.get('title', '').strip() or 'Untitled'
+            first_entry = verified_files[0].entry
+            if isinstance(first_entry, dict):
+                main_title = first_entry.get('title', '').strip() or 'Untitled'
+            else:
+                main_title = 'Untitled'
         
         # Start building content
         content_parts = [f"# {main_title}\n"]
         
         # Add each entry as a section
-        for organized_file in sorted_files:
+        for organized_file in verified_files:
             entry = organized_file.entry
             
-            # Add entry title as h2
-            title = entry.get('title', '').strip() or 'Untitled'
-            content_parts.append(f"## {title}\n")
+            # Type guard check
+            if not isinstance(entry, dict):
+                continue
+            
+            # For single entry, don't duplicate the title as H2
+            # For multiple entries, add entry title as h2
+            if len(verified_files) > 1:
+                title = entry.get('title', '').strip() or 'Untitled'
+                content_parts.append(f"## {title}\n")
             
             # Add description if present
             description = entry.get('description', '').strip()
@@ -181,14 +277,23 @@ class MarkdownWriter:
                 language = entry.get('language', '').lower()
                 # Clean up language identifier
                 language = self._clean_language_identifier(language)
-                content_parts.append(f"### {language.title() if language else 'Code'}\n")
-                content_parts.append(f"```{language}\n{code}\n```\n")
+                
+                # Clean the code content to remove any existing markdown backticks
+                clean_code = self._clean_code_content(code)
+                
+                # Only add language header if we have multiple entries or if language is meaningful
+                if len(verified_files) > 1 or (language and language not in ['text', 'plain', '']):
+                    content_parts.append(f"### {language.title() if language else 'Code'}\n")
+                
+                content_parts.append(f"```{language}\n{clean_code}\n```\n")
         
         # Add source attribution
-        source_url = sorted_files[0].entry.get('source', '')
-        if source_url:
-            content_parts.append("---\n")
-            content_parts.append(f"*Source: {source_url}*\n")
+        first_entry = verified_files[0].entry
+        if isinstance(first_entry, dict):
+            source_url = first_entry.get('source', '')
+            if source_url:
+                content_parts.append("---\n")
+                content_parts.append(f"*Source: {source_url}*\n")
         
         return "\n".join(content_parts)
     
@@ -236,6 +341,39 @@ class MarkdownWriter:
         }
         
         return language_map.get(cleaned, cleaned)
+    
+    def _clean_code_content(self, code: str) -> str:
+        """
+        Clean code content by removing any existing markdown backticks and formatting.
+        
+        Args:
+            code: Raw code content from entry
+            
+        Returns:
+            Cleaned code content without markdown backticks
+        """
+        if not code:
+            return ""
+        
+        # Remove leading/trailing whitespace
+        cleaned = code.strip()
+        
+        # Remove markdown code block markers if they exist
+        # Handle both language-specific and plain code blocks
+        lines = cleaned.split('\n')
+        
+        # Remove starting backticks (```language or just ```)
+        if lines and lines[0].strip().startswith('```'):
+            lines = lines[1:]
+        
+        # Remove ending backticks
+        if lines and lines[-1].strip() == '```':
+            lines = lines[:-1]
+        
+        # Join back and clean up
+        cleaned = '\n'.join(lines).strip()
+        
+        return cleaned
     
     def get_output_summary(self, organized_files: List[OrganizedFile]) -> Dict[str, Any]:
         """

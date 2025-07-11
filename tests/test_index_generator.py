@@ -11,21 +11,11 @@ import os
 import shutil
 from unittest.mock import patch, mock_open
 
-# Handle both relative and absolute imports
-try:
-    from src.index_generator import (
-        IndexGenerator, IndexGeneratorError,
-        generate_index, generate_index_from_organized_files, preview_index_content
-    )
-    from src.file_organizer import OrganizedFile
-except ImportError:
-    import sys
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from src.index_generator import (
-        IndexGenerator, IndexGeneratorError,
-        generate_index, generate_index_from_organized_files, preview_index_content
-    )
-    from src.file_organizer import OrganizedFile
+from c2md.index_generator import (
+    IndexGenerator, IndexGeneratorError,
+    generate_index, generate_index_from_organized_files, preview_index_content
+)
+from c2md.file_organizer import OrganizedFile
 
 
 class TestIndexGenerator(unittest.TestCase):
