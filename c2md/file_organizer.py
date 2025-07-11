@@ -28,7 +28,7 @@ class ConsolidatedEntry:
     def __init__(self, source_url: str, entries: List[Dict[str, Any]]):
         """
         Initialize a consolidated entry.
-        
+
         Args:
             source_url: Common source URL for all entries
             entries: List of entries sharing the same source URL
@@ -95,7 +95,7 @@ class OrganizedFile:
                  filename: str, number: int):
         """
         Initialize an organized file.
-        
+
         Args:
             entry: Original parsed entry from Context7Parser or ConsolidatedEntry
             directory_path: Target directory path for the file
@@ -122,7 +122,7 @@ class FileOrganizer:
     def __init__(self, url_mapper: Optional[URLMapper] = None):
         """
         Initialize the file organizer.
-        
+
         Args:
             url_mapper: URLMapper instance for path extraction. If None, creates a new instance.
         """
@@ -133,13 +133,13 @@ class FileOrganizer:
         """
         Organize parsed entries into a structured directory layout.
         Groups entries by source_url first, then by directory.
-        
+
         Args:
             entries: List of parsed entries from Context7Parser
-            
+
         Returns:
             Dictionary where keys are directory paths and values are lists of OrganizedFile objects
-            
+
         Raises:
             FileOrganizerError: If organization fails
         """
@@ -170,10 +170,10 @@ class FileOrganizer:
     def _group_by_directory(self, entries: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
         """
         Group entries by their target directory path.
-        
+
         Args:
             entries: List of parsed entries
-            
+
         Returns:
             Dictionary mapping directory paths to lists of entries
         """
@@ -207,10 +207,10 @@ class FileOrganizer:
     def _create_organized_structure(self, grouped_entries: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[OrganizedFile]]:
         """
         Create the final organized structure with numbered files.
-        
+
         Args:
             grouped_entries: Dictionary mapping directory paths to entries
-            
+
         Returns:
             Dictionary mapping directory paths to lists of OrganizedFile objects
         """
@@ -247,11 +247,11 @@ class FileOrganizer:
     def _generate_filename(self, entry: Dict[str, Any], number: int) -> str:
         """
         Generate a filename for an entry with number prefix.
-        
+
         Args:
             entry: Parsed entry dictionary
             number: Sequential number for the file
-            
+
         Returns:
             Generated filename with number prefix
         """
@@ -275,10 +275,10 @@ class FileOrganizer:
     def _clean_filename(self, filename: str) -> str:
         """
         Clean a string to be suitable for use as a filename.
-        
+
         Args:
             filename: Raw filename string
-            
+
         Returns:
             Cleaned filename string
         """
@@ -304,10 +304,10 @@ class FileOrganizer:
     def _group_by_source_url(self, entries: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
         """
         Group entries by their source_url for consolidation.
-        
+
         Args:
             entries: List of parsed entries
-            
+
         Returns:
             Dictionary mapping source URLs to lists of entries
         """
@@ -326,10 +326,10 @@ class FileOrganizer:
     def _create_consolidated_entries(self, source_url_groups: Dict[str, List[Dict[str, Any]]]) -> List[Union[Dict[str, Any], ConsolidatedEntry]]:
         """
         Create consolidated entries or keep single entries.
-        
+
         Args:
             source_url_groups: Dictionary mapping source URLs to lists of entries
-            
+
         Returns:
             List of either single entries or ConsolidatedEntry objects
         """
@@ -349,10 +349,10 @@ class FileOrganizer:
     def _group_by_directory_consolidated(self, consolidated_entries: List[Union[Dict[str, Any], ConsolidatedEntry]]) -> Dict[str, List[Union[Dict[str, Any], ConsolidatedEntry]]]:
         """
         Group consolidated entries by their target directory path.
-        
+
         Args:
             consolidated_entries: List of entries or ConsolidatedEntry objects
-            
+
         Returns:
             Dictionary mapping directory paths to lists of entries
         """
@@ -391,10 +391,10 @@ class FileOrganizer:
     def _create_organized_structure_consolidated(self, grouped_entries: Dict[str, List[Union[Dict[str, Any], ConsolidatedEntry]]]) -> Dict[str, List[OrganizedFile]]:
         """
         Create organized structure from grouped consolidated entries.
-        
+
         Args:
             grouped_entries: Dictionary mapping directory paths to consolidated entries
-            
+
         Returns:
             Dictionary mapping directory paths to lists of OrganizedFile objects
         """
@@ -438,11 +438,11 @@ class FileOrganizer:
     def _generate_filename_consolidated(self, entry: Union[Dict[str, Any], ConsolidatedEntry], number: int) -> str:
         """
         Generate a filename for a consolidated entry with number prefix.
-        
+
         Args:
             entry: Entry or ConsolidatedEntry object
             number: Sequential number for the file
-            
+
         Returns:
             Generated filename with number prefix
         """
@@ -473,10 +473,10 @@ class FileOrganizer:
     def get_directory_summary(self, organized_structure: Dict[str, List[OrganizedFile]]) -> Dict[str, Any]:
         """
         Generate a summary of the organized directory structure.
-        
+
         Args:
             organized_structure: Organized file structure
-            
+
         Returns:
             Summary dictionary with statistics and structure info
         """
@@ -512,14 +512,14 @@ def organize_context7_entries(entries: List[Dict[str, Any]],
                             url_mapper: Optional[URLMapper] = None) -> Dict[str, List[OrganizedFile]]:
     """
     Convenience function to organize Context7 entries.
-    
+
     Args:
         entries: List of parsed Context7 entries
         url_mapper: Optional URLMapper instance
-        
+
     Returns:
         Organized file structure dictionary
-        
+
     Raises:
         FileOrganizerError: If organization fails
     """

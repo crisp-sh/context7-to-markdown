@@ -28,7 +28,7 @@ class MarkdownWriter:
     def __init__(self, output_directory: str = "output"):
         """
         Initialize the markdown writer.
-        
+
         Args:
             output_directory: Base directory where markdown files will be written
         """
@@ -42,13 +42,13 @@ class MarkdownWriter:
     def write_file(self, organized_file: OrganizedFile) -> str:
         """
         Write a single organized file to markdown.
-        
+
         Args:
             organized_file: OrganizedFile instance containing entry and metadata
-            
+
         Returns:
             Full path to the written markdown file
-            
+
         Raises:
             MarkdownWriterError: If writing fails
         """
@@ -74,13 +74,13 @@ class MarkdownWriter:
     def write_files(self, organized_files: List[OrganizedFile]) -> List[str]:
         """
         Write multiple organized files to markdown.
-        
+
         Args:
             organized_files: List of OrganizedFile instances
-            
+
         Returns:
             List of full paths to written markdown files
-            
+
         Raises:
             MarkdownWriterError: If writing fails
         """
@@ -117,12 +117,12 @@ class MarkdownWriter:
     def _group_files_by_path(self, organized_files: List[OrganizedFile]) -> Dict[str, List[OrganizedFile]]:
         """
         Group organized files by their full path.
-        
+
         Files with the same source URL should be combined into a single markdown file.
-        
+
         Args:
             organized_files: List of OrganizedFile instances
-            
+
         Returns:
             Dictionary mapping file paths to lists of OrganizedFile instances
         """
@@ -139,10 +139,10 @@ class MarkdownWriter:
     def _generate_markdown_content(self, organized_files: List[OrganizedFile]) -> str:
         """
         Generate markdown content for one or more organized files.
-        
+
         Args:
             organized_files: List of OrganizedFile instances (should share same source URL)
-            
+
         Returns:
             Complete markdown content as string
         """
@@ -164,10 +164,10 @@ class MarkdownWriter:
     def _generate_consolidated_markdown_content(self, organized_files: List[OrganizedFile]) -> str:
         """
         Generate markdown content for consolidated entries.
-        
+
         Args:
             organized_files: List of OrganizedFile instances with ConsolidatedEntry
-            
+
         Returns:
             Complete markdown content as string
         """
@@ -213,10 +213,10 @@ class MarkdownWriter:
     def _generate_regular_markdown_content(self, organized_files: List[OrganizedFile]) -> str:
         """
         Generate markdown content for regular entries.
-        
+
         Args:
             organized_files: List of OrganizedFile instances with regular dict entries
-            
+
         Returns:
             Complete markdown content as string
         """
@@ -300,10 +300,10 @@ class MarkdownWriter:
     def _clean_language_identifier(self, language: str) -> str:
         """
         Clean and normalize language identifier for code blocks.
-        
+
         Args:
             language: Raw language string from entry
-            
+
         Returns:
             Cleaned language identifier
         """
@@ -345,10 +345,10 @@ class MarkdownWriter:
     def _clean_code_content(self, code: str) -> str:
         """
         Clean code content by removing any existing markdown backticks and formatting.
-        
+
         Args:
             code: Raw code content from entry
-            
+
         Returns:
             Cleaned code content without markdown backticks
         """
@@ -378,10 +378,10 @@ class MarkdownWriter:
     def get_output_summary(self, organized_files: List[OrganizedFile]) -> Dict[str, Any]:
         """
         Get a summary of what would be written without actually writing files.
-        
+
         Args:
             organized_files: List of OrganizedFile instances
-            
+
         Returns:
             Dictionary containing summary information
         """
@@ -409,11 +409,11 @@ class MarkdownWriter:
 def write_markdown_file(organized_file: OrganizedFile, output_directory: str = "output") -> str:
     """
     Convenience function to write a single organized file to markdown.
-    
+
     Args:
         organized_file: OrganizedFile instance
         output_directory: Directory where the file will be written
-        
+
     Returns:
         Full path to the written file
     """
@@ -424,11 +424,11 @@ def write_markdown_file(organized_file: OrganizedFile, output_directory: str = "
 def write_markdown_files(organized_files: List[OrganizedFile], output_directory: str = "output") -> List[str]:
     """
     Convenience function to write multiple organized files to markdown.
-    
+
     Args:
         organized_files: List of OrganizedFile instances
         output_directory: Directory where files will be written
-        
+
     Returns:
         List of full paths to written files
     """
@@ -439,10 +439,10 @@ def write_markdown_files(organized_files: List[OrganizedFile], output_directory:
 def preview_markdown_content(organized_files: List[OrganizedFile]) -> str:
     """
     Preview the markdown content that would be generated without writing to file.
-    
+
     Args:
         organized_files: List of OrganizedFile instances (should share same source)
-        
+
     Returns:
         Generated markdown content
     """

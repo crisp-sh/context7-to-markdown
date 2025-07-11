@@ -35,18 +35,18 @@ class URLMapper:
     def extract_path(self, source_url: str) -> str:
         """
         Extract directory path from a SOURCE URL.
-        
+
         Args:
             source_url: The SOURCE URL from a Context7 entry
-            
+
         Returns:
             Directory path structure for file organization
-            
+
         Examples:
             https://neon.com/docs/data-api/get-started → data-api/get-started
             https://neon.com/docs/guides/neon-auth-api → guides/neon-auth-api
             https://neon.com/docs/neon-auth/sdk/react/objects/stack-app → neon-auth/sdk/react/objects/stack-app
-            
+
         Raises:
             URLMapperError: If URL cannot be parsed or no valid path found
         """
@@ -89,13 +89,13 @@ class URLMapper:
     def extract_main_directory(self, source_url: str) -> str:
         """
         Extract just the main directory (first level) from SOURCE URL.
-        
+
         Args:
             source_url: The SOURCE URL from a Context7 entry
-            
+
         Returns:
             Main directory name for top-level organization
-            
+
         Examples:
             https://neon.com/docs/data-api/get-started → data-api
             https://neon.com/docs/guides/neon-auth-api → guides
@@ -106,13 +106,13 @@ class URLMapper:
     def extract_file_path(self, source_url: str) -> Tuple[str, str]:
         """
         Extract both directory and filename components from SOURCE URL.
-        
+
         Args:
             source_url: The SOURCE URL from a Context7 entry
-            
+
         Returns:
             Tuple of (directory_path, filename) for file organization
-            
+
         Examples:
             https://neon.com/docs/data-api/get-started → ('data-api', 'get-started')
             https://neon.com/docs/guides/neon-auth-api → ('guides', 'neon-auth-api')
@@ -131,10 +131,10 @@ class URLMapper:
     def _is_valid_url(self, url: str) -> bool:
         """
         Validate if the URL is properly formatted.
-        
+
         Args:
             url: URL string to validate
-            
+
         Returns:
             True if URL is valid, False otherwise
         """
@@ -148,10 +148,10 @@ class URLMapper:
     def _extract_docs_path(self, url_path: str) -> Optional[str]:
         """
         Extract the path after documentation directory patterns.
-        
+
         Args:
             url_path: Path component of the URL
-            
+
         Returns:
             Path after docs directory or None if not found
         """
@@ -168,10 +168,10 @@ class URLMapper:
     def _format_path(self, path: str) -> str:
         """
         Format and clean the extracted path.
-        
+
         Args:
             path: Raw extracted path
-            
+
         Returns:
             Cleaned and formatted path
         """

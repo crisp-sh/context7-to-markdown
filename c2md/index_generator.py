@@ -28,7 +28,7 @@ class IndexGenerator:
     def __init__(self, output_directory: str = "output"):
         """
         Initialize the index generator.
-        
+
         Args:
             output_directory: Base directory where files are located and index will be written
         """
@@ -38,14 +38,14 @@ class IndexGenerator:
     def generate_index(self, file_paths: List[str], output_path: Optional[str] = None) -> str:
         """
         Generate index file from a list of markdown file paths.
-        
+
         Args:
             file_paths: List of relative file paths to include in index
             output_path: Optional custom output path for index file
-            
+
         Returns:
             Full path to the generated index file
-            
+
         Raises:
             IndexGeneratorError: If generation fails
         """
@@ -76,11 +76,11 @@ class IndexGenerator:
                                           output_path: Optional[str] = None) -> str:
         """
         Generate index file from organized file objects.
-        
+
         Args:
             organized_files: List of OrganizedFile instances
             output_path: Optional custom output path for index file
-            
+
         Returns:
             Full path to the generated index file
         """
@@ -122,10 +122,10 @@ class IndexGenerator:
     def _organize_files_by_directory(self, file_paths: List[str]) -> Dict[str, List[Dict[str, str]]]:
         """
         Organize file paths by their directory structure.
-        
+
         Args:
             file_paths: List of file paths to organize
-            
+
         Returns:
             Dictionary mapping directory paths to lists of file information
         """
@@ -162,10 +162,10 @@ class IndexGenerator:
     def _extract_title_from_filename(self, filename: str) -> str:
         """
         Extract a human-readable title from a filename.
-        
+
         Args:
             filename: The filename to extract title from
-            
+
         Returns:
             Extracted title string
         """
@@ -186,10 +186,10 @@ class IndexGenerator:
     def _extract_title_from_markdown(self, file_path: str) -> Optional[str]:
         """
         Extract title from markdown file's first heading.
-        
+
         Args:
             file_path: Path to the markdown file
-            
+
         Returns:
             Extracted title or None if not found
         """
@@ -220,10 +220,10 @@ class IndexGenerator:
     def _generate_index_content(self, directory_structure: Dict[str, List[Dict[str, str]]]) -> str:
         """
         Generate the complete index markdown content.
-        
+
         Args:
             directory_structure: Organized directory structure
-            
+
         Returns:
             Complete markdown content for the index
         """
@@ -251,7 +251,7 @@ class IndexGenerator:
 
             # Add file links
             for file_info in files:
-                filename = file_info['filename']
+                file_info['filename']
                 file_path = file_info['path']
                 title = file_info['title']
 
@@ -276,10 +276,10 @@ class IndexGenerator:
     def get_index_summary(self, file_paths: List[str]) -> Dict[str, Any]:
         """
         Get a summary of what the index would contain without generating it.
-        
+
         Args:
             file_paths: List of file paths to analyze
-            
+
         Returns:
             Dictionary containing summary information
         """
@@ -307,12 +307,12 @@ def generate_index(file_paths: List[str], output_directory: str = "output",
                   output_path: Optional[str] = None) -> str:
     """
     Convenience function to generate index from file paths.
-    
+
     Args:
         file_paths: List of markdown file paths
         output_directory: Directory where files are located
         output_path: Optional custom output path for index
-        
+
     Returns:
         Full path to generated index file
     """
@@ -325,12 +325,12 @@ def generate_index_from_organized_files(organized_files: List[OrganizedFile],
                                        output_path: Optional[str] = None) -> str:
     """
     Convenience function to generate index from organized files.
-    
+
     Args:
         organized_files: List of OrganizedFile instances
         output_directory: Directory where files are located
         output_path: Optional custom output path for index
-        
+
     Returns:
         Full path to generated index file
     """
@@ -341,11 +341,11 @@ def generate_index_from_organized_files(organized_files: List[OrganizedFile],
 def preview_index_content(file_paths: List[str], output_directory: str = "output") -> str:
     """
     Preview the index content that would be generated without writing to file.
-    
+
     Args:
         file_paths: List of markdown file paths
         output_directory: Directory where files are located
-        
+
     Returns:
         Generated index content
     """

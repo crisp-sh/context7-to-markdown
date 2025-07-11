@@ -37,21 +37,21 @@ class Context7Parser:
     def parse_file(self, file_path: str) -> List[Dict[str, Any]]:
         """
         Parse a Context7 format file and return list of entry dictionaries.
-        
+
         Args:
             file_path: Path to the Context7 format text file
-            
+
         Returns:
             List of entry dictionaries with structure:
             {
                 "title": str,
-                "description": str, 
+                "description": str,
                 "source": str,
                 "language": str,
                 "code": str,
                 "original_order": int
             }
-            
+
         Raises:
             Context7ParseError: If file cannot be read or parsed
             FileNotFoundError: If file does not exist
@@ -68,10 +68,10 @@ class Context7Parser:
     def parse_content(self, content: str) -> List[Dict[str, Any]]:
         """
         Parse Context7 format content string.
-        
+
         Args:
             content: Raw text content in Context7 format
-            
+
         Returns:
             List of parsed entry dictionaries
         """
@@ -100,10 +100,10 @@ class Context7Parser:
     def _parse_single_entry(self, entry_text: str) -> Optional[Dict[str, Any]]:
         """
         Parse a single Context7 entry.
-        
+
         Args:
             entry_text: Raw text of a single entry
-            
+
         Returns:
             Parsed entry dictionary or None if parsing fails
         """
@@ -172,10 +172,10 @@ class Context7Parser:
     def _validate_entry(self, entry_data: Dict[str, Any]) -> bool:
         """
         Validate that entry has minimum required fields.
-        
+
         Args:
             entry_data: Parsed entry dictionary
-            
+
         Returns:
             True if entry is valid, False otherwise
         """
@@ -198,7 +198,7 @@ class Context7Parser:
     def create_sample_entry() -> Dict[str, Any]:
         """
         Create a sample entry for testing purposes.
-        
+
         Returns:
             Sample entry dictionary
         """
@@ -215,13 +215,13 @@ class Context7Parser:
 def parse_context7_file(file_path: str) -> List[Dict[str, Any]]:
     """
     Convenience function to parse a Context7 file.
-    
+
     Args:
         file_path: Path to Context7 format file
-        
+
     Returns:
         List of parsed entry dictionaries
-        
+
     Raises:
         Context7ParseError: If parsing fails
     """
@@ -232,10 +232,10 @@ def parse_context7_file(file_path: str) -> List[Dict[str, Any]]:
 def parse_context7_content(content: str) -> List[Dict[str, Any]]:
     """
     Convenience function to parse Context7 content string.
-    
+
     Args:
         content: Context7 format content
-        
+
     Returns:
         List of parsed entry dictionaries
     """

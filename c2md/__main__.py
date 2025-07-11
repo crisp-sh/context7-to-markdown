@@ -24,10 +24,10 @@ except ImportError:
 def validate_input_file(file_path: str) -> None:
     """
     Validate that the input file exists and is readable.
-    
+
     Args:
         file_path: Path to the input file
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         PermissionError: If file is not readable
@@ -45,10 +45,10 @@ def validate_input_file(file_path: str) -> None:
 def ensure_output_directory(output_dir: str) -> None:
     """
     Create output directory if it doesn't exist.
-    
+
     Args:
         output_dir: Path to the output directory
-        
+
     Raises:
         PermissionError: If directory cannot be created
     """
@@ -63,10 +63,10 @@ def ensure_output_directory(output_dir: str) -> None:
 def flatten_organized_structure(organized_structure: Dict[str, List[OrganizedFile]]) -> List[OrganizedFile]:
     """
     Flatten the organized structure into a single list of OrganizedFile objects.
-    
+
     Args:
         organized_structure: Dictionary mapping directory paths to lists of OrganizedFile objects
-        
+
     Returns:
         Flattened list of all OrganizedFile objects
     """
@@ -80,7 +80,7 @@ def print_processing_summary(entries_count: int, files_written: List[str],
                            index_path: Optional[str] = None) -> None:
     """
     Print a summary of the processing results.
-    
+
     Args:
         entries_count: Number of entries processed
         files_written: List of written file paths
