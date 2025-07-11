@@ -1,10 +1,6 @@
 # Context7 to Markdown (`c2md`)
 
-A blazing fast CLI tool that converts Context7 formatted llms.txt files to organized markdown documentation with automatic directory structure, multi-language support, and table of contents generation. Supports both local files and direct URLs from Context7.com.
-
-> Only caveat is Context7 does not have an open API at the moment, so you must download the raw llms.txt and you MUST add or specify the tokens query to be >= the total number of tokens.
-> 
-> For example, [context7.com/context7/neon/llms.txt?tokens=519821](https://context7.com/context7/neon/llms.txt?tokens=519821).
+A blazing fast CLI tool that converts Context7 URLs & llms.txt files to organized markdown documentation with automatic directory structure, multi-language parsing support, and table of contents generation. Supports both local files and direct URLs from Context7.com.
 
 Install with pip
 ```bash
@@ -17,16 +13,32 @@ uv pip install c2md
 ```bash
 uvx c2md
 ```
-## ✨ Features
+## Features
 
-- **⚓ Convert Context7 to Markdown**: Transform Context7 format files into clean, organized markdown documentation
-- **🧠 Smart Organization**: Automatically organizes files into logical directory structures based on source URLs.
-- **🗨️ Multi-Language Support**: Consolidates multi-language sections into a single document.
-- **📜 Table of Contents**: Generates comprehensive index files to provide context to your agent.
-- **🗺️ URL Mapping**: Intelligently maps source URLs to appropriate file paths and names
-- **❌ Error Handling**: Robust error handling with detailed feedback for troubleshooting
+#### **⚓ Convert Context7 to Markdown**
 
-## 🤔 Why `c2md`?
+Transform Context7 links or llms.txt files into clean, organized markdown documentation.
+
+#### **🧠 Smart Organization**
+
+Automatically organizes markdown files into logical directory structures based on source URLs.
+
+#### **🗨️ Multi-Language Support**
+
+Consolidates multi-language sections into a single document.
+
+#### **📜 Table of Contents** 
+
+Generates comprehensive index files to provide context to your agent.
+
+#### **🗺️ URL Mapping** 
+
+Intelligently maps source URLs to appropriate file paths and names
+
+#### **❌ Error Handling**
+Robust error handling with detailed feedback for troubleshooting
+
+## Why `c2md`? 🤔
 
 MCP is clunky, slow, adds additional prompt context, and time consuming. 
 
@@ -34,15 +46,15 @@ With `c2md`, you can pass a specific section of a technology's documentation to 
 
 Depending on the number of locally available documentation sections/files, this can save tokens/context. For example, the Neon docs have around 240 sections (520,000 tokens), with the total 000-index.md costing around 4,000 tokens; alternatively, calls to the Context7 MCP can cost anywhere from 8,000 to 20,000 tokens.  
 
-## 🚀 Installation
+## Installation
 
-### Using pip
+#### Using pip
 
 ```bash
 pip install c2md
 ```
 
-### Using uv
+#### Using uv
 
 ```bash
 uv pip install c2md
@@ -52,21 +64,10 @@ or
 uvx c2md
 ```
 
-### Development Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/crisp-sh/context7-to-markdown.git
-cd context7-to-markdown
-
-# Install in development mode
-pip install -e .
-```
-
 ## 📋 Requirements
 
 - Python 3.8 or higher
-- No external dependencies required
+- No external dependencies required unless developing
 
 ## 🛠️ Usage
 
@@ -106,7 +107,27 @@ c2md https://context7.com/context7/supabase/llms.txt?tokens=1000000 -d /path/to/
 - `--no-tree`: Disable table of contents generation
 - `-h, --help`: Show help message and exit
 
-## 📁 Output Structure
+<details>
+    <summary>
+    <strong>Developing locally & contributing</strong>
+    </summary>
+
+### Contributing 🤝
+
+Contributions are welcome! Please feel free to submit a PR if you would like to contribute or have an issue.
+
+### Development Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/crisp-sh/context7-to-markdown.git
+cd context7-to-markdown
+
+# Install in development mode
+pip install -e .
+```
+
+### Output Structure
 
 The tool creates an organized directory structure:
 
@@ -124,7 +145,7 @@ output/
         └── 001-guide.md
 ```
 
-## 🎯 Context7 Format
+### Context7 Format
 
 The tool processes Context7 format files, which should contain entries with:
 - **SOURCE**: URL or source identifier
@@ -132,7 +153,7 @@ The tool processes Context7 format files, which should contain entries with:
 - **TITLE**: Optional title for the content
 - **LANGUAGE**: Denotes a multi-language document
 
-## 🏗️ Architecture
+### Architecture
 
 The tool consists of several modular components:
 
@@ -142,7 +163,7 @@ The tool consists of several modular components:
 - **Markdown Writer**: Generates clean markdown files
 - **Index Generator**: Creates table of contents
 
-## 🧪 Testing
+### Testing
 
 Run the test suite using Hatch:
 
@@ -170,11 +191,11 @@ python -m unittest discover tests
 python -m unittest discover tests
 ```
 
-## 🔄 Releasing
+### Releasing
 
 This project uses automated versioned releases with [Hatch](https://hatch.pypa.io/) for version management.
 
-### Quick Release
+#### Quick Release
 
 ```bash
 # Create a patch release (0.1.0 → 0.1.1)
@@ -187,11 +208,7 @@ hatch run release minor
 hatch run release major
 ```
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a PR if you would like to contribute or have an issue.
-
-### Development Setup
+#### Development Setup
 
 ```bash
 # Clone the repository
@@ -206,7 +223,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -e .
 ```
 
-### Running Tests
+#### Running Tests
 
 ```bash
 # Run all tests with Hatch
@@ -218,7 +235,8 @@ hatch run test tests/test_specific.py
 # Run tests with coverage
 hatch run test-cov
 ```
+</details>
 
-## 🐛 Bug Reports
+## Bug Reports
 
 If you encounter any issues, please report them on the [GitHub Issues](https://github.com/crisp-sh/context7-to-markdown/issues) page.
