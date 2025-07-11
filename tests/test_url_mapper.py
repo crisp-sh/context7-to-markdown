@@ -6,7 +6,7 @@ from SOURCE URLs for organizing markdown files.
 """
 
 import unittest
-from src.url_mapper import URLMapper, URLMapperError, extract_directory_path, extract_main_directory
+from c2md.url_mapper import URLMapper, URLMapperError, extract_directory_path, extract_main_directory
 
 
 class TestURLMapper(unittest.TestCase):

@@ -15,29 +15,29 @@ from io import StringIO
 
 # Handle both relative and absolute imports
 try:
-    from context7_to_markdown.__main__ import (
+    from c2md.__main__ import (
         validate_input_file, ensure_output_directory, flatten_organized_structure,
         print_processing_summary, main
     )
-    from context7_to_markdown.file_organizer import OrganizedFile
-    from context7_to_markdown.parser import Context7ParseError
-    from context7_to_markdown.url_mapper import URLMapperError
-    from context7_to_markdown.file_organizer import FileOrganizerError
-    from context7_to_markdown.markdown_writer import MarkdownWriterError
-    from context7_to_markdown.index_generator import IndexGeneratorError
+    from c2md.file_organizer import OrganizedFile
+    from c2md.parser import Context7ParseError
+    from c2md.url_mapper import URLMapperError
+    from c2md.file_organizer import FileOrganizerError
+    from c2md.markdown_writer import MarkdownWriterError
+    from c2md.index_generator import IndexGeneratorError
 except ImportError:
     import sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from context7_to_markdown.__main__ import (
+    from c2md.__main__ import (
         validate_input_file, ensure_output_directory, flatten_organized_structure,
         print_processing_summary, main
     )
-    from context7_to_markdown.file_organizer import OrganizedFile
-    from context7_to_markdown.parser import Context7ParseError
-    from context7_to_markdown.url_mapper import URLMapperError
-    from context7_to_markdown.file_organizer import FileOrganizerError
-    from context7_to_markdown.markdown_writer import MarkdownWriterError
-    from context7_to_markdown.index_generator import IndexGeneratorError
+    from c2md.file_organizer import OrganizedFile
+    from c2md.parser import Context7ParseError
+    from c2md.url_mapper import URLMapperError
+    from c2md.file_organizer import FileOrganizerError
+    from c2md.markdown_writer import MarkdownWriterError
+    from c2md.index_generator import IndexGeneratorError
 
 
 class TestValidateInputFile(unittest.TestCase):
@@ -323,11 +323,11 @@ print("Hello, World!")
         if os.path.exists(self.test_dir):
             shutil.rmtree(self.test_dir)
     
-    @patch('context7_to_markdown.__main__.Context7Parser')
-    @patch('context7_to_markdown.__main__.URLMapper')
-    @patch('context7_to_markdown.__main__.FileOrganizer')
-    @patch('context7_to_markdown.__main__.MarkdownWriter')
-    @patch('context7_to_markdown.__main__.IndexGenerator')
+    @patch('c2md.__main__.Context7Parser')
+    @patch('c2md.__main__.URLMapper')
+    @patch('c2md.__main__.FileOrganizer')
+    @patch('c2md.__main__.MarkdownWriter')
+    @patch('c2md.__main__.IndexGenerator')
     @patch('argparse.ArgumentParser.parse_args')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_successful_execution(self, mock_stdout, mock_parse_args, mock_index_gen, mock_writer,
@@ -399,10 +399,10 @@ print("Hello, World!")
     def test_main_no_tree_option(self, mock_stdout):
         """Test main function with --no-tree option."""
         
-        with patch('context7_to_markdown.__main__.Context7Parser') as mock_parser, \
-             patch('context7_to_markdown.__main__.FileOrganizer') as mock_organizer, \
-             patch('context7_to_markdown.__main__.MarkdownWriter') as mock_writer, \
-             patch('context7_to_markdown.__main__.IndexGenerator') as mock_index_gen, \
+        with patch('c2md.__main__.Context7Parser') as mock_parser, \
+             patch('c2md.__main__.FileOrganizer') as mock_organizer, \
+             patch('c2md.__main__.MarkdownWriter') as mock_writer, \
+             patch('c2md.__main__.IndexGenerator') as mock_index_gen, \
              patch('argparse.ArgumentParser.parse_args') as mock_parse_args:
             
             # Mock parsed arguments
@@ -467,7 +467,7 @@ print("Hello, World!")
         mock_args.tree = True
         mock_parse_args.return_value = mock_args
         
-        with patch('context7_to_markdown.__main__.validate_input_file', side_effect=PermissionError("Permission denied")):
+        with patch('c2md.__main__.validate_input_file', side_effect=PermissionError("Permission denied")):
             with self.assertRaises(SystemExit) as cm:
                 main()
             
@@ -487,7 +487,7 @@ print("Hello, World!")
         mock_args.tree = True
         mock_parse_args.return_value = mock_args
         
-        with patch('context7_to_markdown.__main__.Context7Parser') as mock_parser:
+        with patch('c2md.__main__.Context7Parser') as mock_parser:
             mock_parser_instance = Mock()
             mock_parser_instance.parse_file.side_effect = Context7ParseError("Invalid format")
             mock_parser.return_value = mock_parser_instance
@@ -511,8 +511,8 @@ print("Hello, World!")
         mock_args.tree = True
         mock_parse_args.return_value = mock_args
         
-        with patch('context7_to_markdown.__main__.Context7Parser') as mock_parser, \
-             patch('context7_to_markdown.__main__.URLMapper') as mock_mapper:
+        with patch('c2md.__main__.Context7Parser') as mock_parser, \
+             patch('c2md.__main__.URLMapper') as mock_mapper:
             
             mock_parser_instance = Mock()
             mock_parser_instance.parse_file.return_value = [{'title': 'Test'}]
@@ -539,8 +539,8 @@ print("Hello, World!")
         mock_args.tree = True
         mock_parse_args.return_value = mock_args
         
-        with patch('context7_to_markdown.__main__.Context7Parser') as mock_parser, \
-             patch('context7_to_markdown.__main__.FileOrganizer') as mock_organizer:
+        with patch('c2md.__main__.Context7Parser') as mock_parser, \
+             patch('c2md.__main__.FileOrganizer') as mock_organizer:
             
             mock_parser_instance = Mock()
             mock_parser_instance.parse_file.return_value = [{'title': 'Test'}]
@@ -568,9 +568,9 @@ print("Hello, World!")
         mock_args.tree = True
         mock_parse_args.return_value = mock_args
         
-        with patch('context7_to_markdown.__main__.Context7Parser') as mock_parser, \
-             patch('context7_to_markdown.__main__.FileOrganizer') as mock_organizer, \
-             patch('context7_to_markdown.__main__.MarkdownWriter') as mock_writer:
+        with patch('c2md.__main__.Context7Parser') as mock_parser, \
+             patch('c2md.__main__.FileOrganizer') as mock_organizer, \
+             patch('c2md.__main__.MarkdownWriter') as mock_writer:
             
             # Setup successful parsing and organizing
             mock_parser_instance = Mock()
@@ -593,10 +593,10 @@ print("Hello, World!")
             error_output = mock_stderr.getvalue()
             self.assertIn("❌ Markdown writing error", error_output)
     
-    @patch('context7_to_markdown.__main__.IndexGenerator')
-    @patch('context7_to_markdown.__main__.MarkdownWriter')
-    @patch('context7_to_markdown.__main__.FileOrganizer')
-    @patch('context7_to_markdown.__main__.Context7Parser')
+    @patch('c2md.__main__.IndexGenerator')
+    @patch('c2md.__main__.MarkdownWriter')
+    @patch('c2md.__main__.FileOrganizer')
+    @patch('c2md.__main__.Context7Parser')
     @patch('argparse.ArgumentParser.parse_args')
     @patch('sys.stderr', new_callable=StringIO)
     def test_main_index_generator_error_no_exit(self, mock_stderr, mock_parse_args, mock_parser, mock_organizer, mock_writer, mock_index_gen):
@@ -651,7 +651,7 @@ print("Hello, World!")
         error_output = mock_stderr.getvalue()
         self.assertIn("❌ File not found", error_output)
     
-    @patch('context7_to_markdown.__main__.validate_input_file')
+    @patch('c2md.__main__.validate_input_file')
     @patch('argparse.ArgumentParser.parse_args')
     @patch('sys.stderr', new_callable=StringIO)
     def test_main_unexpected_error(self, mock_stderr, mock_parse_args, mock_validate):
@@ -674,7 +674,7 @@ print("Hello, World!")
         self.assertIn("❌ Unexpected error", error_output)
         self.assertIn("💡 Please check your input file and try again", error_output)
     
-    @patch('context7_to_markdown.__main__.Context7Parser')
+    @patch('c2md.__main__.Context7Parser')
     @patch('argparse.ArgumentParser.parse_args')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_no_entries_found(self, mock_stdout, mock_parse_args, mock_parser):
@@ -695,11 +695,11 @@ print("Hello, World!")
         output = mock_stdout.getvalue()
         self.assertIn("⚠️  No entries found in the input file", output)
     
-    @patch('context7_to_markdown.__main__.validate_input_file')
-    @patch('context7_to_markdown.__main__.ensure_output_directory')
-    @patch('context7_to_markdown.__main__.Context7Parser')
-    @patch('context7_to_markdown.__main__.FileOrganizer')
-    @patch('context7_to_markdown.__main__.MarkdownWriter')
+    @patch('c2md.__main__.validate_input_file')
+    @patch('c2md.__main__.ensure_output_directory')
+    @patch('c2md.__main__.Context7Parser')
+    @patch('c2md.__main__.FileOrganizer')
+    @patch('c2md.__main__.MarkdownWriter')
     @patch('argparse.ArgumentParser.parse_args')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_argument_parsing(self, mock_stdout, mock_parse_args, mock_writer, mock_organizer, mock_parser, mock_ensure_dir, mock_validate):

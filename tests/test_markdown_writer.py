@@ -11,21 +11,11 @@ import os
 import shutil
 from unittest.mock import patch, mock_open
 
-# Handle both relative and absolute imports
-try:
-    from src.markdown_writer import (
-        MarkdownWriter, MarkdownWriterError,
-        write_markdown_file, write_markdown_files, preview_markdown_content
-    )
-    from src.file_organizer import OrganizedFile
-except ImportError:
-    import sys
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from src.markdown_writer import (
-        MarkdownWriter, MarkdownWriterError,
-        write_markdown_file, write_markdown_files, preview_markdown_content
-    )
-    from src.file_organizer import OrganizedFile
+from c2md.markdown_writer import (
+    MarkdownWriter, MarkdownWriterError,
+    write_markdown_file, write_markdown_files, preview_markdown_content
+)
+from c2md.file_organizer import OrganizedFile
 
 
 class TestMarkdownWriter(unittest.TestCase):
