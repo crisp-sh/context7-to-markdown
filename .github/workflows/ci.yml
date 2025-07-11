@@ -9,9 +9,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30  # Prevent hanging jobs
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+      fail-fast: false  # Don't cancel all jobs if one fails
     steps:
       - uses: actions/checkout@v4
 
@@ -21,12 +23,34 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install project & tooling
+      - name: Display Python version
+        run: |
+          python --version
+          python -m pip --version
+
+      - name: Upgrade pip
         run: |
           python -m pip install --upgrade pip
-          pip install hatch
-          hatch env create
-          hatch run pip install black isort bandit safety
+          python -m pip --version
+
+      - name: Install hatch
+        run: |
+          pip install --verbose hatch
+          hatch --version
+
+      - name: Create hatch environment
+        run: |
+          hatch env create --verbose
+          hatch env show
+
+      - name: Install project dependencies
+        run: |
+          hatch run pip list
+          hatch run pip install -e . --verbose
+
+      - name: Install dev tools
+        run: |
+          hatch run pip install --verbose black isort bandit safety
 
       # ---------------- Code-quality gates ----------------
       - name: Lint (ruff)
@@ -47,7 +71,7 @@ jobs:
       # ---------------- Tests & coverage ----------------
       - name: Run tests with coverage
         run: |
-          hatch run pytest --cov=c2md --cov-report=xml
+          hatch run pytest --cov=c2md --cov-report=xml -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

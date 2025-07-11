@@ -9,7 +9,7 @@ description = "CLI tool to convert Context7 llms.txt format to locally organized
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "crisp.sh", email = "s@crisp.sh"},
+    {name = "crisp-sh", email = "s@crisp.sh"},
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -54,6 +54,7 @@ dependencies = [
     "pytest",
     "pytest-cov",
     "ruff",
+    "psutil>=5.9.8",
 ]
 
 [tool.hatch.envs.default.scripts]
