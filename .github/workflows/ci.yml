@@ -68,27 +68,57 @@ jobs:
       - name: Lint (ruff)
         id: lint-ruff
         continue-on-error: true
-        run: hatch run ruff check c2md
+        run: |
+          if hatch run ruff check c2md; then
+            echo "ruff_result=success" >> $GITHUB_ENV
+          else
+            echo "ruff_result=failure" >> $GITHUB_ENV
+            echo "::warning::Ruff linting check failed"
+          fi
 
       - name: Style check (black)
         id: black-check
         continue-on-error: true
-        run: hatch run black --check . || echo "::warning::Black formatting check failed"
+        run: |
+          if hatch run black --check .; then
+            echo "black_result=success" >> $GITHUB_ENV
+          else
+            echo "black_result=failure" >> $GITHUB_ENV
+            echo "::warning::Black formatting check failed"
+          fi
 
       - name: Import order check (isort)
         id: isort-check
         continue-on-error: true
-        run: hatch run isort --check-only . || echo "::warning::isort import order check failed"
+        run: |
+          if hatch run isort --check-only .; then
+            echo "isort_result=success" >> $GITHUB_ENV
+          else
+            echo "isort_result=failure" >> $GITHUB_ENV
+            echo "::warning::isort import order check failed"
+          fi
 
       - name: Security scan (bandit)
         id: bandit-check
         continue-on-error: true
-        run: hatch run bandit -r c2md || echo "::warning::Bandit security scan found issues"
+        run: |
+          if hatch run bandit -r c2md; then
+            echo "bandit_result=success" >> $GITHUB_ENV
+          else
+            echo "bandit_result=failure" >> $GITHUB_ENV
+            echo "::warning::Bandit security scan found issues"
+          fi
 
       - name: Dependency vulnerability scan (safety)
         id: hatch-dep-check
         continue-on-error: true
-        run: hatch run safety scan --detailed-output || echo "::warning::Safety scan encountered an issue"
+        run: |
+          if hatch run safety scan --detailed-output; then
+            echo "safety_result=success" >> $GITHUB_ENV
+          else
+            echo "safety_result=failure" >> $GITHUB_ENV
+            echo "::warning::Safety scan encountered an issue"
+          fi
 
       # ---------------- Tests & coverage ----------------
       - name: Debug test environment
@@ -107,7 +137,12 @@ jobs:
         id: test-coverage
         continue-on-error: true
         run: |
-          hatch run pytest --cov=c2md --cov-report=xml -v --tb=short || echo "::warning::Tests failed with exit code $?"
+          if hatch run pytest --cov=c2md --cov-report=xml -v --tb=short; then
+            echo "test_result=success" >> $GITHUB_ENV
+          else
+            echo "test_result=failure" >> $GITHUB_ENV
+            echo "::warning::Tests failed with exit code $?"
+          fi
 
       - name: Upload coverage to Codecov
         id: upload-codecov
@@ -150,16 +185,16 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           
           echo "### Code Quality Checks:" >> $GITHUB_STEP_SUMMARY
-          echo "- Ruff linting: ${{ steps.lint-ruff.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.lint-ruff.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Black formatting: ${{ steps.black-check.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.black-check.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- isort import order: ${{ steps.isort-check.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.isort-check.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Bandit security scan: ${{ steps.bandit-check.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.bandit-check.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Safety dependency scan: ${{ steps.hatch-dep-check.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.hatch-dep-check.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Ruff linting: ${{ env.ruff_result == 'failure' && '⚠️ Failed (non-blocking)' || env.ruff_result == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Black formatting: ${{ env.black_result == 'failure' && '⚠️ Failed (non-blocking)' || env.black_result == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- isort import order: ${{ env.isort_result == 'failure' && '⚠️ Failed (non-blocking)' || env.isort_result == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Bandit security scan: ${{ env.bandit_result == 'failure' && '⚠️ Failed (non-blocking)' || env.bandit_result == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Safety dependency scan: ${{ env.safety_result == 'failure' && '⚠️ Failed (non-blocking)' || env.safety_result == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           echo "### Testing:" >> $GITHUB_STEP_SUMMARY
           echo "- Debug test environment: ${{ steps.debug-test-env.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Test execution: ${{ steps.test-coverage.outcome == 'failure' && '⚠️ Failed (non-blocking)' || steps.test-coverage.outcome == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Test execution: ${{ env.test_result == 'failure' && '⚠️ Failed (non-blocking)' || env.test_result == 'success' && '✅ Passed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "- Coverage upload: ${{ steps.upload-codecov.outcome == 'success' && '✅ Passed' || steps.upload-codecov.outcome == 'failure' && '⚠️ Failed (non-blocking)' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "- Persist coverage artifact: ${{ steps.persist-coverage.outcome == 'success' && '✅ Passed' || steps.persist-coverage.outcome == 'failure' && '⚠️ Failed (non-blocking)' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
