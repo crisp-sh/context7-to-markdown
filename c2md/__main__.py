@@ -260,7 +260,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Convert Context7 format to organized markdown documentation"
     )
-    parser.add_argument("input", help="Context7 generated llms.txt file or context7.com URL")
+    parser.add_argument("input", help="Context7 formatted llms.txt or Context7 URL (required)")
     parser.add_argument(
         "-d", "--directory", default=None, help="Output directory (default: ./output)"
     )
