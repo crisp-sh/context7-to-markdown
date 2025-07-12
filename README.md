@@ -25,11 +25,11 @@ This tool excels when dealing with large libraries like Neon, which has around 2
 
 If that didn't sell you, `c2md`:
 
-- **⚓ Convert Context7 to local markdown**
+- **⚓ Converts Context7 to local markdown**
 - **🧠 Logically organizes the library into sections with sequential file naming**
 - **🗨️ Consolidates multi-language sections into a single document**
 - **📜 Generates Table of contents = easy context for your agent**
-- **🗺️ URL mapping of source URLs to appropriate file paths and names** 
+- **🗺️ Maps source URLs to appropriate file paths and names** 
 - **🏎️ Fast as hell**
 
 ## Installation
