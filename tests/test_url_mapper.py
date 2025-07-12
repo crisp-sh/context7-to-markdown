@@ -21,6 +21,7 @@ class TestURLMapper(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures before each test method."""
         self.mapper = URLMapper()
+        self.mapper_no_prefix = URLMapper(no_prefix=True)
 
     def test_extract_path_basic_examples(self):
         """Test URL path extraction with architecture examples."""
@@ -140,6 +141,33 @@ class TestURLMapper(unittest.TestCase):
             with self.subTest(url=url, number=number):
                 result = self.mapper.get_numbered_filename(url, number)
                 self.assertEqual(result, expected)
+
+    def test_get_numbered_filename_no_prefix(self):
+        """Test generation of numbered filenames with no_prefix=True."""
+        test_cases = [
+            ("https://neon.com/docs/data-api/get-started", 1, "get-started.md"),
+            ("https://neon.com/docs/guides/neon-auth-api", 25, "neon-auth-api.md"),
+            ("https://example.com/docs/reference/api", 999, "api.md")
+        ]
+
+        for url, number, expected in test_cases:
+            with self.subTest(url=url, number=number):
+                result = self.mapper_no_prefix.get_numbered_filename(url, number)
+                self.assertEqual(result, expected)
+
+    def test_mapper_initialization(self):
+        """Test URLMapper initialization with different parameters."""
+        # Test default initialization
+        default_mapper = URLMapper()
+        self.assertFalse(default_mapper.no_prefix)
+        
+        # Test with no_prefix=True
+        no_prefix_mapper = URLMapper(no_prefix=True)
+        self.assertTrue(no_prefix_mapper.no_prefix)
+        
+        # Test with no_prefix=False
+        prefix_mapper = URLMapper(no_prefix=False)
+        self.assertFalse(prefix_mapper.no_prefix)
 
     def test_invalid_urls(self):
         """Test handling of invalid URLs."""
@@ -272,6 +300,24 @@ class TestEdgeCases(unittest.TestCase):
         url = "https://example.com/docs/api/test"
         result = self.mapper.get_numbered_filename(url, 9999)
         self.assertTrue(result.startswith("9999-"))
+
+    def test_numbered_filename_no_prefix_edge_cases(self):
+        """Test numbered filename generation without prefix for edge cases."""
+        mapper_no_prefix = URLMapper(no_prefix=True)
+        
+        # Test with URL that has no clear filename
+        url = "https://example.com/docs/"
+        result = mapper_no_prefix.get_numbered_filename(url, 1)
+        self.assertFalse(result.startswith("001-"))
+        self.assertTrue(result.endswith(".md"))
+        self.assertNotIn("001", result)
+        
+        # Test with various numbers (should not appear in filename)
+        url = "https://example.com/docs/api/test"
+        for number in [1, 99, 999, 9999]:
+            result = mapper_no_prefix.get_numbered_filename(url, number)
+            self.assertEqual(result, "test.md")
+            self.assertNotIn(str(number), result)
 
 
 if __name__ == '__main__':

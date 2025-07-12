@@ -119,14 +119,16 @@ class OrganizedFile:
 class FileOrganizer:
     """Organizes Context7 entries into a structured directory layout."""
 
-    def __init__(self, url_mapper: Optional[URLMapper] = None):
+    def __init__(self, url_mapper: Optional[URLMapper] = None, no_prefix: bool = False):
         """
         Initialize the file organizer.
 
         Args:
             url_mapper: URLMapper instance for path extraction. If None, creates a new instance.
+            no_prefix: If True, filenames will be generated without number prefixes
         """
-        self.url_mapper = url_mapper or URLMapper()
+        self.url_mapper = url_mapper or URLMapper(no_prefix=no_prefix)
+        self.no_prefix = no_prefix
         self._directory_counters = defaultdict(int)
 
     def organize_entries(self, entries: List[Dict[str, Any]]) -> Dict[str, List[OrganizedFile]]:
@@ -250,14 +252,14 @@ class FileOrganizer:
 
     def _generate_filename(self, entry: Dict[str, Any], number: int) -> str:
         """
-        Generate a filename for an entry with number prefix.
+        Generate a filename for an entry with or without number prefix.
 
         Args:
             entry: Parsed entry dictionary
             number: Sequential number for the file
 
         Returns:
-            Generated filename with number prefix
+            Generated filename with or without number prefix based on no_prefix flag
         """
         source_url = entry.get('source', '')
 
@@ -273,8 +275,14 @@ class FileOrganizer:
         title = entry.get('title', 'untitled')
         # Clean title for filename
         clean_title = self._clean_filename(title)
-        padded_number = f"{number:03d}"
-        return f"{padded_number}-{clean_title}.md"
+        
+        if self.no_prefix:
+            # Return filename without number prefix
+            return f"{clean_title}.md"
+        else:
+            # Format number with zero padding (3 digits)
+            padded_number = f"{number:03d}"
+            return f"{padded_number}-{clean_title}.md"
 
     def _clean_filename(self, filename: str) -> str:
         """

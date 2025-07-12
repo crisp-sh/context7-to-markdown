@@ -268,12 +268,16 @@ def main():
         "-nt", "--no-toc", action="store_false", dest="tree", default=True,
         help="Disable table of contents generation"
     )
+    parser.add_argument(
+        "-np", "--no-prefix", action="store_true", default=False,
+        help="Generate filenames without number prefixes"
+    )
     args = parser.parse_args()
 
     # Determine output directory
     # Always create an "output" subdirectory in the specified or current directory
     if args.directory is not None:
-        output_directory = args.directory
+        output_directory = os.path.join(args.directory, "output")
     else:
         output_directory = os.path.join(os.getcwd(), "output")
 
@@ -327,8 +331,8 @@ def main():
 
         # Step 4: Organize entries into directory structure
         print("🗂️  Organizing entries into directory structure...")
-        url_mapper = URLMapper()
-        file_organizer = FileOrganizer(url_mapper)
+        url_mapper = URLMapper(no_prefix=args.no_prefix)
+        file_organizer = FileOrganizer(url_mapper, no_prefix=args.no_prefix)
         organized_structure = file_organizer.organize_entries(entries)
 
         # Flatten the organized structure

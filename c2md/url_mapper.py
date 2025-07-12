@@ -21,17 +21,21 @@ class URLMapper:
 
     # Common documentation URL patterns
     DOCS_PATTERNS = [
-        r'/docs/?',
-        r'/doc/?',
-        r'/documentation/?',
-        r'/guide/?',
+        r'/documentation(?:/|$)',
+        r'/docs(?:/|$)',
+        r'/doc(?:/|$)',
+        r'/guide(?:/|$)',
         r'/api/(?=(?:docs?|reference))',  # Only match /api/ when followed by docs or reference
-        r'/reference/?'
+        r'/reference(?:/|$)'
     ]
 
-    def __init__(self):
-        """Initialize the URL mapper."""
-        pass
+    def __init__(self, no_prefix: bool = False):
+        """Initialize the URL mapper.
+        
+        Args:
+            no_prefix: If True, filenames will be generated without number prefixes
+        """
+        self.no_prefix = no_prefix
 
     def extract_path(self, source_url: str) -> str:
         """
@@ -205,18 +209,23 @@ class URLMapper:
             number: Sequential number for the file
 
         Returns:
-            Formatted filename with number prefix
+            Formatted filename with or without number prefix based on no_prefix flag
 
         Examples:
-            URL with number 1 → '001-get-started.md'
+            URL with number 1 (no_prefix=False) → '001-get-started.md'
+            URL with number 1 (no_prefix=True) → 'get-started.md'
         """
         _, filename = self.extract_file_path(source_url)
         if not filename:
             filename = 'untitled'
 
-        # Format number with zero padding (3 digits)
-        padded_number = f"{number:03d}"
-        return f"{padded_number}-{filename}.md"
+        if self.no_prefix:
+            # Return filename without number prefix
+            return f"{filename}.md"
+        else:
+            # Format number with zero padding (3 digits)
+            padded_number = f"{number:03d}"
+            return f"{padded_number}-{filename}.md"
 
 
 def extract_directory_path(source_url: str) -> str:

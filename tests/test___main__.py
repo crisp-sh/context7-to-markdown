@@ -5,6 +5,7 @@ This module tests the command-line interface functionality including argument pa
 file validation, directory management, workflow orchestration, and error handling.
 """
 
+import argparse
 import os
 import shutil
 import sys
@@ -339,9 +340,10 @@ print("Hello, World!")
         """Test successful execution of main function."""
         # Mock parsed arguments
         mock_args = Mock()
-        mock_args.input_file = self.test_file
+        mock_args.input = self.test_file
         mock_args.directory = self.test_dir
-        mock_args.tree = True  # Default tree option
+        mock_args.tree = True  # Default: table of contents is generated
+        mock_args.no_prefix = False  # Default: prefixes are included
         mock_parse_args.return_value = mock_args
 
         # Mock parser
@@ -400,8 +402,8 @@ print("Hello, World!")
         self.assertIn("✅ Processing complete!", output)
 
     @patch('sys.stdout', new_callable=StringIO)
-    def test_main_no_tree_option(self, mock_stdout):
-        """Test main function with --no-tree option."""
+    def test_main_no_toc_option(self, mock_stdout):
+        """Test main function with --no-toc option."""
 
         with patch('c2md.__main__.Context7Parser') as mock_parser, \
              patch('c2md.__main__.FileOrganizer') as mock_organizer, \
@@ -411,9 +413,10 @@ print("Hello, World!")
 
             # Mock parsed arguments
             mock_args = Mock()
-            mock_args.input_file = self.test_file
+            mock_args.input = self.test_file
             mock_args.directory = self.test_dir
-            mock_args.tree = False  # --no-tree sets tree to False
+            mock_args.tree = False  # --no-toc sets tree to False
+            mock_args.no_prefix = False  # Default
             mock_parse_args.return_value = mock_args
 
             # Setup mocks
@@ -439,6 +442,48 @@ print("Hello, World!")
             output = mock_stdout.getvalue()
             self.assertNotIn("📑 Generating table of contents", output)
 
+    @patch('c2md.__main__.URLMapper')
+    @patch('c2md.__main__.FileOrganizer')
+    @patch('c2md.__main__.MarkdownWriter')
+    @patch('c2md.__main__.Context7Parser')
+    @patch('argparse.ArgumentParser.parse_args')
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_no_prefix_option(self, mock_stdout, mock_parse_args, mock_parser, mock_writer, mock_organizer, mock_mapper):
+        """Test main function with --no-prefix option."""
+        # Mock parsed arguments
+        mock_args = Mock()
+        mock_args.input = self.test_file
+        mock_args.directory = self.test_dir
+        mock_args.tree = True  # Default
+        mock_args.no_prefix = True  # --no-prefix flag
+        mock_parse_args.return_value = mock_args
+
+        # Setup mocks
+        mock_parser_instance = Mock()
+        mock_parser_instance.parse_file.return_value = [
+            {'title': 'Test', 'source': 'https://example.com/test', 'original_order': 0}
+        ]
+        mock_parser.return_value = mock_parser_instance
+
+        # URLMapper should be initialized with no_prefix=True
+        mock_mapper_instance = Mock()
+        mock_mapper.return_value = mock_mapper_instance
+
+        # FileOrganizer should be initialized with no_prefix=True
+        mock_organizer_instance = Mock()
+        mock_organizer_instance.organize_entries.return_value = {'test': []}
+        mock_organizer.return_value = mock_organizer_instance
+
+        mock_writer_instance = Mock()
+        mock_writer_instance.write_files.return_value = []
+        mock_writer.return_value = mock_writer_instance
+
+        main()
+
+        # Verify URLMapper and FileOrganizer were initialized with no_prefix=True
+        mock_mapper.assert_called_once_with(no_prefix=True)
+        mock_organizer.assert_called_once_with(mock_mapper_instance, no_prefix=True)
+
     @patch('argparse.ArgumentParser.parse_args')
     @patch('sys.stderr', new_callable=StringIO)
     def test_main_file_not_found_error(self, mock_stderr, mock_parse_args):
@@ -447,9 +492,10 @@ print("Hello, World!")
 
         # Mock parsed arguments with nonexistent file
         mock_args = Mock()
-        mock_args.input_file = nonexistent_file
+        mock_args.input = nonexistent_file
         mock_args.directory = self.test_dir
         mock_args.tree = True
+        mock_args.no_prefix = False
         mock_parse_args.return_value = mock_args
 
         with self.assertRaises(SystemExit) as cm:
@@ -466,9 +512,10 @@ print("Hello, World!")
         """Test main function with permission error."""
         # Mock parsed arguments
         mock_args = Mock()
-        mock_args.input_file = self.test_file
+        mock_args.input = self.test_file
         mock_args.directory = self.test_dir
         mock_args.tree = True
+        mock_args.no_prefix = False
         mock_parse_args.return_value = mock_args
 
         with patch('c2md.__main__.validate_input_file', side_effect=PermissionError("Permission denied")):
@@ -486,9 +533,10 @@ print("Hello, World!")
         """Test main function with Context7 parsing error."""
         # Mock parsed arguments
         mock_args = Mock()
-        mock_args.input_file = self.test_file
+        mock_args.input = self.test_file
         mock_args.directory = self.test_dir
         mock_args.tree = True
+        mock_args.no_prefix = False
         mock_parse_args.return_value = mock_args
 
         with patch('c2md.__main__.Context7Parser') as mock_parser:
@@ -510,9 +558,10 @@ print("Hello, World!")
         """Test main function with URL mapper error."""
         # Mock parsed arguments
         mock_args = Mock()
-        mock_args.input_file = self.test_file
+        mock_args.input = self.test_file
         mock_args.directory = self.test_dir
         mock_args.tree = True
+        mock_args.no_prefix = False
         mock_parse_args.return_value = mock_args
 
         with patch('c2md.__main__.Context7Parser') as mock_parser, \
@@ -538,9 +587,10 @@ print("Hello, World!")
         """Test main function with file organizer error."""
         # Mock parsed arguments
         mock_args = Mock()
-        mock_args.input_file = self.test_file
+        mock_args.input = self.test_file
         mock_args.directory = self.test_dir
         mock_args.tree = True
+        mock_args.no_prefix = False
         mock_parse_args.return_value = mock_args
 
         with patch('c2md.__main__.Context7Parser') as mock_parser, \
@@ -567,9 +617,10 @@ print("Hello, World!")
         """Test main function with markdown writer error."""
         # Mock parsed arguments
         mock_args = Mock()
-        mock_args.input_file = self.test_file
+        mock_args.input = self.test_file
         mock_args.directory = self.test_dir
         mock_args.tree = True
+        mock_args.no_prefix = False
         mock_parse_args.return_value = mock_args
 
         with patch('c2md.__main__.Context7Parser') as mock_parser, \
@@ -607,9 +658,10 @@ print("Hello, World!")
         """Test main function with index generator error (should not exit)."""
         # Mock parsed arguments
         mock_args = Mock()
-        mock_args.input_file = self.test_file
+        mock_args.input = self.test_file
         mock_args.directory = self.test_dir
         mock_args.tree = True
+        mock_args.no_prefix = False
         mock_parse_args.return_value = mock_args
 
         # Setup successful workflow until index generation
@@ -643,9 +695,10 @@ print("Hello, World!")
         """Test main function with value error."""
         # Mock the return value of parse_args()
         mock_args = Mock()
-        mock_args.input_file = "invalid_file"
+        mock_args.input = "invalid_file"
         mock_args.directory = self.test_dir
         mock_args.tree = True
+        mock_args.no_prefix = False
         mock_parse_args.return_value = mock_args
 
         with self.assertRaises(SystemExit) as cm:
@@ -662,9 +715,10 @@ print("Hello, World!")
         """Test main function with unexpected error."""
         # Mock parsed arguments
         mock_args = Mock()
-        mock_args.input_file = self.test_file
+        mock_args.input = self.test_file
         mock_args.directory = self.test_dir
         mock_args.tree = True
+        mock_args.no_prefix = False
         mock_parse_args.return_value = mock_args
 
         # Make validation fail with unexpected error
@@ -685,9 +739,10 @@ print("Hello, World!")
         """Test main function when no entries are found."""
         # Mock parsed arguments
         mock_args = Mock()
-        mock_args.input_file = self.test_file
+        mock_args.input = self.test_file
         mock_args.directory = self.test_dir
         mock_args.tree = True
+        mock_args.no_prefix = False
         mock_parse_args.return_value = mock_args
 
         mock_parser_instance = Mock()
@@ -710,9 +765,10 @@ print("Hello, World!")
         """Test that command line arguments are parsed correctly."""
         # Mock parsed arguments
         mock_args = Mock()
-        mock_args.input_file = 'input.txt'
+        mock_args.input = 'input.txt'
         mock_args.directory = '/custom/dir'
-        mock_args.tree = False  # --no-tree flag
+        mock_args.tree = False  # --no-toc flag
+        mock_args.no_prefix = False  # Default
         mock_parse_args.return_value = mock_args
 
         # Mock empty parsing to avoid workflow execution
@@ -755,7 +811,7 @@ print("Hello, World!")
         with open(test_file, 'w') as f:
             f.write(context7_content)
 
-        mock_argv = ['__main__.py', test_file, '-d', self.test_dir, '--no-tree']
+        mock_argv = ['__main__.py', test_file, '-d', self.test_dir, '--no-toc']
 
         with patch.object(sys, 'argv', mock_argv):
             with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
@@ -768,6 +824,110 @@ print("Hello, World!")
                 # Check that output was created
                 output_dir = os.path.join(self.test_dir, "output")
                 self.assertTrue(os.path.exists(output_dir))
+
+    def test_end_to_end_workflow_with_no_prefix(self):
+        """Test end-to-end workflow with --no-prefix option."""
+        # Create a test Context7 file
+        test_file = os.path.join(self.test_dir, "test.context7")
+        context7_content = """TITLE: Sample Entry
+DESCRIPTION: This is a test entry
+SOURCE: https://example.com/docs/api/sample
+LANGUAGE: python
+CODE:
+print("Hello, World!")
+
+----------------------------------------
+
+TITLE: Another Entry
+DESCRIPTION: Second test entry
+SOURCE: https://example.com/docs/guides/intro
+LANGUAGE: python
+CODE:
+def test(): pass
+"""
+        with open(test_file, 'w') as f:
+            f.write(context7_content)
+
+        mock_argv = ['__main__.py', test_file, '-d', self.test_dir, '--no-prefix']
+
+        with patch.object(sys, 'argv', mock_argv):
+            with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+                main()
+
+                output = mock_stdout.getvalue()
+                self.assertIn("✅ Processing complete!", output)
+                self.assertIn("📋 Processed 2 Context7 entries", output)
+
+                # Check that output files were created without number prefixes
+                output_dir = os.path.join(self.test_dir, "output")
+                self.assertTrue(os.path.exists(output_dir))
+                
+                # List files to verify no prefixes
+                files = []
+                for root, dirs, filenames in os.walk(output_dir):
+                    for filename in filenames:
+                        if filename.endswith('.md'):
+                            files.append(filename)
+                
+                # Verify filenames don't have number prefixes
+                for filename in files:
+                    self.assertFalse(filename[0:3].isdigit(), f"File {filename} should not start with numbers")
+                    self.assertNotIn('001-', filename)
+                    self.assertNotIn('002-', filename)
+
+    def test_command_line_parsing_no_prefix(self):
+        """Test that command line arguments for --no-prefix are parsed correctly."""
+        test_argv = ['c2md', 'input.txt', '--no-prefix']
+        
+        with patch.object(sys, 'argv', test_argv):
+            parser = argparse.ArgumentParser(
+                description="Convert Context7 format to organized markdown documentation"
+            )
+            parser.add_argument("input", help="Context7 formatted llms.txt or Context7 URL (required)")
+            parser.add_argument(
+                "-d", "--directory", default=None, help="Output directory (default: ./output)"
+            )
+            parser.add_argument(
+                "-nt", "--no-toc", action="store_false", dest="tree", default=True,
+                help="Disable table of contents generation"
+            )
+            parser.add_argument(
+                "-np", "--no-prefix", action="store_true", default=False,
+                help="Generate filenames without number prefixes"
+            )
+            
+            args = parser.parse_args()
+            
+            self.assertEqual(args.input, 'input.txt')
+            self.assertTrue(args.no_prefix)
+            self.assertTrue(args.tree)  # Default value
+
+    def test_command_line_parsing_short_forms(self):
+        """Test that short form arguments work correctly."""
+        test_argv = ['c2md', 'input.txt', '-np', '-nt']
+        
+        with patch.object(sys, 'argv', test_argv):
+            parser = argparse.ArgumentParser(
+                description="Convert Context7 format to organized markdown documentation"
+            )
+            parser.add_argument("input", help="Context7 formatted llms.txt or Context7 URL (required)")
+            parser.add_argument(
+                "-d", "--directory", default=None, help="Output directory (default: ./output)"
+            )
+            parser.add_argument(
+                "-nt", "--no-toc", action="store_false", dest="tree", default=True,
+                help="Disable table of contents generation"
+            )
+            parser.add_argument(
+                "-np", "--no-prefix", action="store_true", default=False,
+                help="Generate filenames without number prefixes"
+            )
+            
+            args = parser.parse_args()
+            
+            self.assertEqual(args.input, 'input.txt')
+            self.assertTrue(args.no_prefix)
+            self.assertFalse(args.tree)  # -nt sets tree to False
 
 
 if __name__ == '__main__':

@@ -114,11 +114,17 @@ class TestFileOrganizer(unittest.TestCase):
         # Test with default URLMapper
         organizer = FileOrganizer()
         self.assertIsInstance(organizer.url_mapper, URLMapper)
+        self.assertFalse(organizer.no_prefix)  # Default should be False
 
         # Test with custom URLMapper
         custom_mapper = URLMapper()
         organizer = FileOrganizer(custom_mapper)
         self.assertEqual(organizer.url_mapper, custom_mapper)
+        
+        # Test with no_prefix=True
+        organizer_no_prefix = FileOrganizer(no_prefix=True)
+        self.assertTrue(organizer_no_prefix.no_prefix)
+        self.assertTrue(organizer_no_prefix.url_mapper.no_prefix)
 
     def test_organize_entries_basic(self):
         """Test basic entry organization."""
@@ -333,6 +339,83 @@ class TestFileOrganizer(unittest.TestCase):
         self.assertEqual(api_files[1].number, 2)
         self.assertEqual(api_files[2].number, 3)
 
+    def test_generate_filename_with_no_prefix(self):
+        """Test filename generation with no_prefix=True."""
+        # Create FileOrganizer with no_prefix=True
+        file_organizer_no_prefix = FileOrganizer(no_prefix=True)
+        
+        entry = {
+            'title': 'Test Entry Title',
+            'source': 'https://example.com/docs/api/test-endpoint',
+            'original_order': 0
+        }
+        
+        # Test with URL
+        filename = file_organizer_no_prefix._generate_filename(entry, 1)
+        self.assertEqual(filename, 'test-endpoint.md')
+        self.assertNotIn('001', filename)
+        
+        # Test without URL (fallback to title)
+        entry_no_url = {
+            'title': 'Another Test Entry',
+            'source': '',
+            'original_order': 0
+        }
+        
+        filename = file_organizer_no_prefix._generate_filename(entry_no_url, 5)
+        self.assertEqual(filename, 'another-test-entry.md')
+        self.assertNotIn('005', filename)
+
+    def test_organize_entries_with_no_prefix(self):
+        """Test organizing entries with no_prefix=True."""
+        file_organizer_no_prefix = FileOrganizer(no_prefix=True)
+        
+        entries = [
+            {
+                'title': 'API Getting Started',
+                'source': 'https://example.com/docs/api/getting-started',
+                'original_order': 0
+            },
+            {
+                'title': 'API Reference',
+                'source': 'https://example.com/docs/api/reference',
+                'original_order': 1
+            }
+        ]
+        
+        result = file_organizer_no_prefix.organize_entries(entries)
+        
+        # Check that filenames don't have number prefixes
+        api_files = result['api']
+        self.assertEqual(api_files[0].filename, 'getting-started.md')
+        self.assertEqual(api_files[1].filename, 'reference.md')
+        
+        # Numbers should still be tracked internally
+        self.assertEqual(api_files[0].number, 1)
+        self.assertEqual(api_files[1].number, 2)
+
+    def test_filename_generation_comparison(self):
+        """Test filename generation with and without prefix."""
+        # Create two organizers with different settings
+        organizer_with_prefix = FileOrganizer(no_prefix=False)
+        organizer_no_prefix = FileOrganizer(no_prefix=True)
+        
+        entry = {
+            'title': 'Test Entry',
+            'source': 'https://example.com/docs/test',
+            'original_order': 0
+        }
+        
+        # Generate filenames with both organizers
+        filename_with_prefix = organizer_with_prefix._generate_filename(entry, 1)
+        filename_no_prefix = organizer_no_prefix._generate_filename(entry, 1)
+        
+        # With prefix should have number
+        self.assertEqual(filename_with_prefix, '001-test.md')
+        
+        # Without prefix should not have number
+        self.assertEqual(filename_no_prefix, 'test.md')
+
 
 class TestConvenienceFunction(unittest.TestCase):
     """Test cases for convenience functions."""
@@ -368,6 +451,29 @@ class TestConvenienceFunction(unittest.TestCase):
 
         self.assertIsInstance(result, dict)
         self.assertIn('', result)
+
+    def test_organize_context7_entries_with_no_prefix(self):
+        """Test convenience function with no_prefix parameter."""
+        # Create a custom mapper with no_prefix=True
+        custom_mapper = URLMapper(no_prefix=True)
+        sample_entries = [
+            {
+                'title': 'Test Entry',
+                'source': 'https://example.com/docs/test',
+                'original_order': 0
+            }
+        ]
+
+        # The organize_context7_entries function should respect the mapper's no_prefix setting
+        result = organize_context7_entries(sample_entries, custom_mapper)
+        
+        self.assertIsInstance(result, dict)
+        self.assertIn('', result)
+        
+        # Check that the filename doesn't have a prefix
+        organized_file = result[''][0]
+        self.assertEqual(organized_file.filename, 'test.md')
+        self.assertNotIn('001', organized_file.filename)
 
 
 class TestIntegrationWithURLMapper(unittest.TestCase):
