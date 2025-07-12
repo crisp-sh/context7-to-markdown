@@ -25,15 +25,19 @@ class IndexGeneratorError(Exception):
 class IndexGenerator:
     """Generates table of contents index from markdown files."""
 
-    def __init__(self, output_directory: str = "output"):
+    def __init__(self, output_directory: str = "output", no_prefix: bool = False):
         """
         Initialize the index generator.
 
         Args:
             output_directory: Base directory where files are located and index will be written
+            no_prefix: If True, omit numeric prefix in index filename
         """
         self.output_directory = output_directory
-        self.index_filename = "000-index.md"
+        if no_prefix:
+            self.index_filename = "index.md"
+        else:
+            self.index_filename = "000-index.md"
 
     def generate_index(self, file_paths: List[str], output_path: Optional[str] = None) -> str:
         """

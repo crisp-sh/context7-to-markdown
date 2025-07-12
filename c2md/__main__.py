@@ -9,9 +9,7 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 try:
     import requests
 except ImportError:
-    print("❌ Error: 'requests' library is required for URL support.", file=sys.stderr)
-    print("💡 Install it with: pip install requests", file=sys.stderr)
-    sys.exit(1)
+    requests = None
 
 # Import all the processing modules
 try:
@@ -171,6 +169,8 @@ def download_context7_content(url: str) -> str:
     Raises:
         RuntimeError: If download fails
     """
+    if requests is None:
+        raise RuntimeError("Optional dependency 'requests' is not installed.")
     try:
         # Add tokens parameter if missing
         url_with_tokens = ensure_tokens_parameter(url)
@@ -275,9 +275,12 @@ def main():
     args = parser.parse_args()
 
     # Determine output directory
-    # Always create an "output" subdirectory in the specified or current directory
     if args.directory is not None:
-        output_directory = os.path.join(args.directory, "output")
+        # If --no-prefix or --no-toc flags are specified, treat provided directory as base and create 'output' subdirectory.
+        if args.no_prefix or not args.tree:
+            output_directory = os.path.join(args.directory, "output")
+        else:
+            output_directory = args.directory
     else:
         output_directory = os.path.join(os.getcwd(), "output")
 
@@ -348,7 +351,7 @@ def main():
         index_path = None
         if args.tree:
             print("📑 Generating table of contents index...")
-            index_generator = IndexGenerator(output_directory)
+            index_generator = IndexGenerator(output_directory, no_prefix=args.no_prefix)
 
             # Convert written files to relative paths for index
             relative_paths = []
