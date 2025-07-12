@@ -265,10 +265,8 @@ def main():
         "-d", "--directory", default=None, help="Output directory (default: ./output)"
     )
     parser.add_argument(
-        "-T", "--tree", action="store_true", default=True, help="Generate table of contents index (default: true)"
-    )
-    parser.add_argument(
-        "-nt", "--no-toc", action="store_false", dest="tree", help="Disable table of contents generation"
+        "-nt", "--no-toc", action="store_false", dest="tree", default=True,
+        help="Disable table of contents generation"
     )
     args = parser.parse_args()
 
