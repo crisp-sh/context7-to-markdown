@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "c2md"
 dynamic = ["version"]
-description = "CLI tool to convert Context7 llms.txt format to locally organized markdown documentation"
+description = "Tool to convert Context7 formatted llms.txt to locally organized markdown library documentation"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [

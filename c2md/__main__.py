@@ -35,7 +35,8 @@ def validate_input_file(file_path: str) -> None:
     Validate that the input file exists and is readable.
 
     Args:
-        file_path: Path to the input file
+        file_path: Path to the Context7 formatted llms.txt 
+        or Context7 URL (required)
 
     Raises:
         FileNotFoundError: If file doesn't exist
@@ -267,7 +268,7 @@ def main():
         "-T", "--tree", action="store_true", default=True, help="Generate table of contents index (default: true)"
     )
     parser.add_argument(
-        "--no-tree", action="store_false", dest="tree", help="Disable table of contents generation"
+        "-nt", "--no-toc", action="store_false", dest="tree", help="Disable table of contents generation"
     )
     args = parser.parse_args()
 

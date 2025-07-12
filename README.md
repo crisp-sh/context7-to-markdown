@@ -1,6 +1,6 @@
 # Context7 to Markdown (`c2md`)
 
-A blazing fast CLI tool that converts Context7 URLs & llms.txt files to organized markdown documentation with automatic directory structure, multi-language parsing support, and table of contents generation. Supports both local files and direct URLs from Context7.com.
+A blazing fast tool that converts Context7 to organized markdown documentation with automatic directory structure, multi-language parsing support, and table of contents generation. Supports both local files and direct URLs from Context7.com.
 
 Install with pip
 ```bash
@@ -10,41 +10,27 @@ Install with uv
 ```bash
 uv pip install c2md
 ```
+*or*
 ```bash
-uvx c2md
+uvx c2md https://context7.com/org/project
 ```
-## Features
-
-#### **⚓ Convert Context7 to Markdown**
-
-Transform Context7 links or llms.txt files into clean, organized markdown documentation.
-
-#### **🧠 Smart Organization**
-
-Automatically organizes markdown files into logical directory structures based on source URLs.
-
-#### **🗨️ Multi-Language Support**
-
-Consolidates multi-language sections into a single document.
-
-#### **📜 Table of Contents** 
-
-Generates comprehensive index files to provide context to your agent.
-
-#### **🗺️ URL Mapping** 
-
-Intelligently maps source URLs to appropriate file paths and names
-
-#### **❌ Error Handling**
-Robust error handling with detailed feedback for troubleshooting
 
 ## Why `c2md`? 🤔
 
-MCP is clunky, slow, adds additional prompt context, and time consuming. 
+MCP servers are fairly new and are quite rudimentary. They introduce latency, increase prompt size, consume tokens on every request, and, in the case of Context7, require network calls for each library lookup. Additionally, Context7's MCP server uses natural language search that can miss relevant sections or return results you don't even need.
 
-With `c2md`, you can pass a specific section of a technology's documentation to an agent. Instead of fairly unreliable natural language search with the Context7 MCP server, you can just attach the `@/path/to/000-index.md` to your agent. 
+With `c2md`, you convert a library <ins>once</ins> per project and reference it locally. Instead of making MCP calls that cost 4,000-20,000 tokens per search, you attach the generated 000-index.md (typically costs less than Context7's `resolve-library-id` alone) directly to your agent. The agent gets complete context without network delays or token waste on repeated or bad searches.
 
-Depending on the number of locally available documentation sections/files, this can save tokens/context. For example, the Neon docs have around 240 sections (520,000 tokens), with the total 000-index.md costing around 4,000 tokens; alternatively, calls to the Context7 MCP can cost anywhere from 8,000 to 20,000 tokens.  
+This tool excels when dealing with large libraries like Neon, which has around 240 sections (~520,000 tokens). The locally generated index provides instant, inexpensive library context to any section while consuming ~50% fewer tokens than equivalent MCP operations. You can even pass the table of contents or specific sections from the library via a rule in your favorite AI IDE.
+
+If that didn't sell you, `c2md`:
+
+- **⚓ Convert Context7 to local markdown**
+- **🧠 Logically organizes the library into sections with sequential file naming**
+- **🗨️ Consolidates multi-language sections into a single document**
+- **📜 Generates Table of contents = easy context for your agent**
+- **🗺️ URL mapping of source URLs to appropriate file paths and names** 
+- **🏎️ Fast as hell**
 
 ## Installation
 
@@ -59,9 +45,9 @@ pip install c2md
 ```bash
 uv pip install c2md
 ```
-or
+*or*
 ```bash
-uvx c2md
+uvx c2md https://context7.com/org/project
 ```
 
 ## 📋 Requirements
@@ -75,12 +61,17 @@ After installation, use the `c2md` command:
 
 ### Basic Usage
 
+From local file - output defaults to ./output/
 ```bash
-# From local file - output defaults to ./output/
 c2md /path/to/llms.txt
-
-# From Context7 URL (must include tokens parameter)
-c2md https://context7.com/context7/neon/llms.txt?tokens=519821
+```
+From Context7 standard URL
+```bash
+c2md https://context7.com/org/project
+```
+From Context7 raw URL with tokens query
+```bash
+c2md https://context7.com/org/project/llms.txt?tokens=173800
 ```
 
 ### Advanced Usage
@@ -89,23 +80,27 @@ c2md https://context7.com/context7/neon/llms.txt?tokens=519821
 # Specify output directory, 001-index.md (ToC) generated in output root
 c2md /path/to/llms.txt -d /path/to/output
 
-# From Context7 URL with output directory
-c2md https://context7.com/context7/neon/llms.txt?tokens=519821 -d .docs/neon
+# From Context7 raw URL with output directory
+c2md https://context7.com/org/project/llms.txt -d .docs/neon
 
 # Disable ToC generation
-c2md /path/to/llms.txt --no-tree
+c2md /path/to/llms.txt -nt
 
-# Full example with all options, no ToC/tree
-c2md https://context7.com/context7/supabase/llms.txt?tokens=1000000 -d /path/to/output --no-tree
+# Full example with all options, no table of contents
+c2md https://context7.com/context7/supabase/llms.txt?tokens=1000000 -d /path/to/output -nt 
 ```
 
 ### Command Line Options
 
-- `input_file`: Path to the Context7 format input file or Context7 URL (required)
+- `input_file|input_url`: Context7 formatted llms.txt or Context7 URL (required)
 - `-d, --directory`: Output directory (default: current directory)
-- `-T, --tree`: Generate table of contents index (default: enabled)
-- `--no-tree`: Disable table of contents generation
+- `-nt, --no-toc`: Disable table of contents generation in documentation root
+- `-np, --no-prefix`: Disable "000-" prefix file naming
 - `-h, --help`: Show help message and exit
+
+## Bug Reports
+
+If you encounter any issues, please report them on the [GitHub Issues](https://github.com/crisp-sh/context7-to-markdown/issues) page.
 
 <details>
     <summary>
@@ -236,7 +231,3 @@ hatch run test tests/test_specific.py
 hatch run test-cov
 ```
 </details>
-
-## Bug Reports
-
-If you encounter any issues, please report them on the [GitHub Issues](https://github.com/crisp-sh/context7-to-markdown/issues) page.
