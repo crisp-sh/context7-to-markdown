@@ -282,7 +282,25 @@ def main():
         else:
             output_directory = args.directory
     else:
-        output_directory = os.path.join(os.getcwd(), "output")
+        # Smart default: if input is URL, use project name; otherwise default to 'output'
+        if is_url(args.input):
+            parsed = urlparse(args.input)
+            path = parsed.path.strip('/')
+            segments = [seg for seg in path.split('/') if seg]
+            if segments:
+                # Handle context7 'llms.txt' suffix
+                if segments[-1].lower() == 'llms.txt' and len(segments) >= 2:
+                    directory_name = segments[-2]
+                else:
+                    directory_name = segments[-1]
+            else:
+                directory_name = 'output'
+            # Fallback to 'output' if extraction fails
+            if not directory_name:
+                directory_name = 'output'
+            output_directory = os.path.join(os.getcwd(), directory_name)
+        else:
+            output_directory = os.path.join(os.getcwd(), "output")
 
     try:
         # Step 1: Check if input is a URL or file
