@@ -50,29 +50,34 @@ uv pip install c2md
 uvx c2md https://context7.com/org/project
 ```
 
-## 📋 Requirements
+## Requirements
 
 - Python 3.8 or higher
 - No external dependencies required unless developing
 
-## 🛠️ Usage
+## Usage
 
-After installation, use the `c2md` command:
-
-### Basic Usage
-
-From local file - output defaults to ./output/
+From local file - output defaults to `./output/`
 ```bash
 c2md /path/to/llms.txt
 ```
-From Context7 standard URL
+From Context7 standard URL - output defaults to `./{project}/`
 ```bash
-c2md https://context7.com/org/project
+c2md https://context7.com/{org}/{project}
 ```
 From Context7 raw URL with tokens query
 ```bash
-c2md https://context7.com/org/project/llms.txt?tokens=173800
+c2md https://context7.com/{org}/{project}/llms.txt?tokens=173800
 ```
+
+### Tips
+
+##### 1. Not all Context7 libraries are created equal. 
+
+Most of the time, if it's generated from a Github repository, it is not the full documentation. That being said, many repositories are solely for documentation or include a documentation app/package. For instance:
+
+**✅ GOOD**: context7/nextjs
+**❌ BAD**:  vercel/next.js
 
 ### Advanced Usage
 
@@ -81,19 +86,22 @@ c2md https://context7.com/org/project/llms.txt?tokens=173800
 c2md /path/to/llms.txt -d /path/to/output
 
 # From Context7 raw URL with output directory
-c2md https://context7.com/org/project/llms.txt -d .docs/neon
+c2md https://context7.com/{org}/{project}/llms.txt -d .docs/neon
 
 # Disable ToC generation
 c2md /path/to/llms.txt -nt
 
+# Disable numbered prefixes ("001-")
+c2md /path/to/llms.txt -np
+
 # Full example with all options, no table of contents
-c2md https://context7.com/context7/supabase/llms.txt?tokens=1000000 -d /path/to/output -nt 
+c2md https://context7.com/llmstxt/better-auth_com-llms.txt/llms.txt?tokens=1000000 -d /path/to/output -nt -np
 ```
 
 ### Command Line Options
 
-- `input_file|input_url`: Context7 formatted llms.txt or Context7 URL (required)
-- `-d, --directory`: Output directory (default: current directory)
+- `{input_file|input_url}`: Context7 formatted llms.txt or Context7 URL (REQUIRED)
+- `-d, --directory`: Output directory. Defaults to the library name if a URL is passed. If a file is passed, defaults to "output"
 - `-nt, --no-toc`: Disable table of contents generation in documentation root
 - `-np, --no-prefix`: Disable "000-" prefix file naming
 - `-h, --help`: Show help message and exit
