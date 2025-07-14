@@ -53,7 +53,7 @@ uvx c2md https://context7.com/org/project
 ## Requirements
 
 - Python 3.8 or higher
-- No external dependencies required unless developing
+- Single external dependency `requests` required
 
 ## Usage
 
